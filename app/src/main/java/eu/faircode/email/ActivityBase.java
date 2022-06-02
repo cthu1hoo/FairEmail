@@ -107,6 +107,14 @@ abstract class ActivityBase extends AppCompatActivity implements SharedPreferenc
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
+        if (!prefs.getBoolean("pro", false)) {
+            prefs.edit()
+                    .putBoolean("pro", true)
+                    .apply();
+
+            WidgetUnified.updateData(this);
+        }
+
         boolean secure = prefs.getBoolean("secure", false);
         if (secure)
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
