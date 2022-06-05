@@ -4,6 +4,10 @@
 
 <br />
 
+First of all, FairEmail's main goal is to help you protect your privacy.
+What follows is a complete overview of all the data that **can be** sent to the internet,
+which in the end is always your choice and therefore optional.
+
 ## Overview
 
 FairEmail **does not** send account information and message data elsewhere than to your email provider.
