@@ -3263,8 +3263,16 @@ public class HtmlHelper {
                         switch (tag) {
                             case "a":
                                 String href = element.attr("href");
-                                if (!TextUtils.isEmpty(href))
+                                if (!TextUtils.isEmpty(href)) {
+                                    if (BuildConfig.DEBUG) {
+                                        Uri uri = UriHelper.guessScheme(Uri.parse(href));
+                                        if (UriHelper.isHyperLink(uri))
+                                            ssb.append("\uD83D\uDD17"); // 🔗
+                                        // Unicode 6.0, supported since Android 4.1
+                                        // https://developer.android.com/guide/topics/resources/internationalization
+                                    }
                                     setSpan(ssb, new URLSpan(href), start, ssb.length());
+                                }
                                 break;
                             case "big":
                                 setSpan(ssb, new RelativeSizeSpan(FONT_LARGE), start, ssb.length());

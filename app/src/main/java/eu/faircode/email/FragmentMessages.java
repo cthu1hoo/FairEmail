@@ -3968,6 +3968,7 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
             @Override
             protected ArrayList<MessageTarget> onExecute(Context context, Bundle args) {
                 String type = args.getString("type");
+                boolean block = args.getBoolean("block");
                 long[] ids = args.getLongArray("ids");
                 boolean filter_archive = args.getBoolean("filter_archive");
 
@@ -6772,7 +6773,7 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
                         if (target.copy)
                             EntityOperation.queue(context, message, EntityOperation.COPY, target.targetFolder.id);
                         else
-                            EntityOperation.queue(context, message, EntityOperation.MOVE, target.targetFolder.id);
+                            EntityOperation.queue(context, message, EntityOperation.MOVE, target.targetFolder.id, null, null, !target.block);
 
                         if (target.block &&
                                 EntityFolder.JUNK.equals(target.targetFolder.type))
@@ -7243,6 +7244,9 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
                 selectionTracker.clearSelection();
                 return true;
             }
+
+            if (!getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
+                return true;
 
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
             boolean collapse_multiple = prefs.getBoolean("collapse_multiple", true);
