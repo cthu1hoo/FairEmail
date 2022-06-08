@@ -2186,7 +2186,7 @@ public class HtmlHelper {
 
     static void removeTrackingPixels(Context context, Document document) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        boolean disconnect_images = prefs.getBoolean("disconnect_images", false);
+        boolean disconnect_images = (prefs.getBoolean("disconnect_images", false) && BuildConfig.DEBUG);
 
         Drawable d = context.getDrawable(R.drawable.twotone_my_location_24);
         d.setTint(Helper.resolveColor(context, R.attr.colorWarning));
@@ -3264,7 +3264,7 @@ public class HtmlHelper {
                             case "a":
                                 String href = element.attr("href");
                                 if (!TextUtils.isEmpty(href)) {
-                                    if (BuildConfig.DEBUG) {
+                                    if (false && BuildConfig.DEBUG) {
                                         Uri uri = UriHelper.guessScheme(Uri.parse(href));
                                         if (UriHelper.isHyperLink(uri))
                                             ssb.append("\uD83D\uDD17"); // 🔗
