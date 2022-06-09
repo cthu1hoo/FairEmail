@@ -583,13 +583,13 @@ Some people ask:
 &#x1F30E; [Google Translate](https://translate.google.com/translate?sl=en&u=https://github.com/M66B/FairEmail/blob/master/FAQ.md%23user-content-faq6)
 
 >
-> **Important**: using your account password [won't be possible anymore from May 30, 2022](https://support.google.com/accounts/answer/6010255).
+> **Important: using your *account* password [won't be possible anymore from May 30, 2022](https://support.google.com/accounts/answer/6010255).**
 >
 > "*To help keep your account secure, starting May 30, 2022, ​​Google will no longer support the use of third-party apps or devices which ask you to sign in to your Google Account using only your username and password.*"
 >
 > &#x2714; If you authorized your Gmail account with the quick setup wizard or manually with an app password, your account will keep being synchronized after May 30, 2022.
 >
-> &#x274C; If you enabled *Less secure apps* in the Google account settings and authorized your Gmail account manually with your normal account password, your account can't be synchronized from May 30, 2022 anymore.
+> &#x274C; If you enabled *Less secure apps* in the Google account settings and authorized your Gmail account manually with your normal account password, your account can't be synchronized from May 30, 2022 anymore. The app will show the error **Invalid credentials (Failure)**.
 >
 > How to check:
 >
@@ -3845,6 +3845,9 @@ Also, I prefer to do a few things very well, instead of many things only half.
 Moreover, from a security perspective, it is not a good idea to grant many permissions to a single app.
 
 You are advised to use the excellent, open source [DAVx⁵](https://f-droid.org/packages/at.bitfire.davdroid/) app to synchronize/manage your calendars/contacts.
+
+If you want to synchronize Outlook contacts and you have access to Google Workspace,
+please [see here](https://support.google.com/a/users/answer/156595) about how you can set up contact syncing.
 
 Most providers support exporting your contacts.
 Please [see here](https://support.google.com/contacts/answer/1069522) about how you can import contacts if synchronizing is not possible.

@@ -4,6 +4,11 @@
 
 ### [Juratyrant](https://en.wikipedia.org/wiki/Juratyrant)
 
+* Added searching for text in draft
+* Added OAuth for Gmail POP3 accounts
+* Small improvements and minor bug fixes
+* Updated translations
+
 ### 1.1907 - 2022-06-07
 
 * Fixed deleted POP3 messages reappearing
