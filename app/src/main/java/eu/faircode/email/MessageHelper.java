@@ -3112,7 +3112,37 @@ public class MessageHelper {
                 String result;
 
                 try {
-                    Object content = h.part.getContent();
+                    Object content;
+
+                    // Check for UTF-16 LE without BOM
+                    String pcharset = h.contentType.getParameter("charset");
+                    if ("utf-16".equalsIgnoreCase(pcharset) && override == null) {
+                        String charset = pcharset;
+                        BufferedInputStream bis = new BufferedInputStream(h.part.getDataHandler().getInputStream());
+                        byte[] bytes = new byte[64];
+                        bis.mark(bytes.length);
+                        int count = bis.read(bytes);
+                        if (count > 32) {
+                            int s = ((bytes[0] & 0xff) << 8) | (bytes[1] & 0xff);
+                            boolean bom = (s == 0xfeff || s == 0xfffe);
+                            if (!bom) {
+                                boolean le = true;
+                                for (int i = 1; i < count; i += 2)
+                                    if (bytes[i] != 0) {
+                                        le = false;
+                                        break;
+                                    }
+                                if (le) {
+                                    charset = StandardCharsets.UTF_16LE.name();
+                                    Log.e("Charset " + pcharset + " -> " + charset);
+                                }
+                            }
+                        }
+                        bis.reset();
+                        content = Helper.readStream(bis, Charset.forName(charset));
+                    } else
+                        content = h.part.getContent();
+
                     Log.i("Content class=" + (content == null ? null : content.getClass().getName()));
 
                     if (content == null) {
