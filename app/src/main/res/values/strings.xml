@@ -200,6 +200,7 @@
     <string name="title_setup_gmail" translatable="false">Gmail</string>
     <string name="title_setup_oauth" translatable="false">%1$s (OAuth)</string>
     <string name="title_setup_other">Other provider</string>
+    <string name="title_setup_inbound">Incoming email only (email cannot be sent!)</string>
     <string name="title_setup_pop3">POP3 account</string>
     <string name="title_setup_oauth_permission">The email provider has approved OAuth only for the Play Store and GitHub version</string>
     <string name="title_setup_gmail_support">Authorizing Google accounts will work in the Play Store and GitHub version only because Android checks the digital app signature</string>
@@ -232,6 +233,8 @@
     <string name="title_setup_permissions">Grant permissions</string>
     <string name="title_setup_permissions_remark">To access contact information (optional)</string>
     <string name="title_setup_permissions_explanation">Contact permissions are required to look up contact info and to suggest contacts</string>
+    <string name="title_setup_permissions_notify">To show new messages notifications (optional)</string>
+    <string name="title_setup_permissions_notify_explanation">Notification permissions are required to show notifications for new messages in the status bar</string>
     <string name="title_setup_permission_why">Which permissions are needed and why?</string>
     <string name="title_setup_permission_import_contacts">How can I import contacts?</string>
     <string name="title_setup_doze">Disable battery optimizations</string>

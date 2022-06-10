@@ -3,7 +3,7 @@ apply plugin: 'com.bugsnag.android.gradle'
 apply plugin: 'kotlin-android'
 apply plugin: 'de.undercouch.download'
 
-def getVersionCode = { -> return 1907 }
+def getVersionCode = { -> return 1908 }
 def getRevision = { -> return "a" }
 def getReleaseName = { -> return "Juratyrant" }
 // https://en.wikipedia.org/wiki/List_of_dinosaur_genera
@@ -16,14 +16,14 @@ if (rootProject.file("local.properties").exists())
     localProperties.load(new FileInputStream(rootProject.file("local.properties")))
 
 android {
-    compileSdkVersion 32
+    compileSdkVersion 33
     namespace 'eu.faircode.email'
 
     // https://apilevels.com/
     defaultConfig {
         applicationId "eu.faircode.email"
         minSdkVersion 21
-        targetSdkVersion 32
+        targetSdkVersion 33
         versionCode getVersionCode()
         versionName "1." + getVersionCode()
         archivesBaseName = "FairEmail-v$versionName" + getRevision()

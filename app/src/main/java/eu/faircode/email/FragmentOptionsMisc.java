@@ -192,7 +192,6 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
     private Button btnGC;
     private Button btnCharsets;
     private Button btnFontMap;
-    private Button btnCiphers;
     private Button btnFiles;
     private Button btnUris;
     private Button btnAllPermissions;
@@ -367,7 +366,6 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
         btnGC = view.findViewById(R.id.btnGC);
         btnCharsets = view.findViewById(R.id.btnCharsets);
         btnFontMap = view.findViewById(R.id.btnFontMap);
-        btnCiphers = view.findViewById(R.id.btnCiphers);
         btnFiles = view.findViewById(R.id.btnFiles);
         btnUris = view.findViewById(R.id.btnUris);
         btnAllPermissions = view.findViewById(R.id.btnAllPermissions);
@@ -624,7 +622,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
                 swCheckWeekly.setEnabled(checked);
                 if (!checked) {
                     NotificationManager nm =
-                            (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+                            Helper.getSystemService(getContext(), NotificationManager.class);
                     nm.cancel(NotificationHelper.NOTIFICATION_UPDATE);
                 }
             }
@@ -1297,23 +1295,6 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
             }
         });
 
-        btnCiphers.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new AlertDialog.Builder(getContext())
-                        .setIcon(R.drawable.twotone_info_24)
-                        .setTitle(R.string.title_advanced_ciphers)
-                        .setMessage(Log.getCiphers())
-                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                // Do nothing
-                            }
-                        })
-                        .show();
-            }
-        });
-
         final String title = getString(R.string.title_advanced_files, Helper.humanReadableByteCount(MIN_FILE_SIZE));
         btnFiles.setText(title);
 
@@ -1569,7 +1550,8 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
 
         if (!Helper.isPlayStoreInstall() &&
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationManager nm = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+            NotificationManager nm =
+                    Helper.getSystemService(getContext(), NotificationManager.class);
 
             NotificationChannel notification = nm.getNotificationChannel("update");
             if (notification != null) {

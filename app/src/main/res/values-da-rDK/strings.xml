@@ -156,6 +156,7 @@
     <string name="title_setup_accounts">Konti</string>
     <string name="title_setup_identities">Identiteter</string>
     <string name="title_setup_other">Anden udbyder</string>
+    <string name="title_setup_inbound">Kun indgående e-mail (e-mail kan ikke sendes!)</string>
     <string name="title_setup_pop3">POP3-konto</string>
     <string name="title_setup_oauth_permission">E-mailudbyderen har kun godkendt OAuth til Play Store- og GitHub-versioner</string>
     <string name="title_setup_gmail_support">Godkendelse af Google-konti fungerer kun i Play Store-versioner, da Android tjekker den digitale app-signatur</string>
@@ -211,6 +212,7 @@
     <string name="title_setup_still">Resterer stadig</string>
     <string name="title_setup_error">Fejl</string>
     <string name="title_setup_pop">Brug POP3 (anbefales ikke)</string>
+    <string name="title_setup_recent">Brug \'recent\' for flere e-mailklienter</string>
     <string name="title_setup_configuring">Opsætter konto &#8230;</string>
     <string name="title_setup_app_password">En app-adgangskode skal muligvis benyttes</string>
     <string name="title_setup_extra">Ekstra</string>
@@ -524,8 +526,6 @@
     <string name="title_advanced_notifications_default">Standardkanal</string>
     <string name="title_advanced_notifications_service">Monitorér kanal</string>
     <string name="title_advanced_notifications_newest_first">Vis seneste notifikationer først</string>
-    <string name="title_advanced_notifications_background">Benyt baggrundstjeneste til beskedsynkronisering</string>
-    <string name="title_advanced_notifications_background_hint">En baggrundstjeneste kan til enhver tid stoppes af Android, men behøver ingen statusbjælkenotifikation</string>
     <string name="title_advanced_badge">Vis launcher-ikon med antal nye beskeder</string>
     <string name="title_advanced_unseen_ignored">Lad antal Nye beskeder matche notifikationsantal</string>
     <string name="title_advanced_notify_background">Vis kun notifikationer i baggrundstilstand</string>
@@ -555,6 +555,8 @@
     <string name="title_advanced_light">Benyt notifikations-LED</string>
     <string name="title_advanced_sound">Vælg notifikationslyd</string>
     <string name="title_advanced_notify_screen_on">Tænd kortvarigt skærmen ved nye beskednotifikationer</string>
+    <string name="title_advanced_notifications_background">Benyt baggrundstjeneste til beskedsynkronisering</string>
+    <string name="title_advanced_notifications_background_hint">En baggrundstjeneste kan til enhver tid stoppes af Android, men behøver ingen statusbjælkenotifikation</string>
     <string name="title_advanced_confirm_links">Bekræft åbning af links</string>
     <string name="title_advanced_check_links_dbl">Tjek domæneblokeringslister for mistænkelige links</string>
     <string name="title_advanced_browse_links">Delegér åbningslinks til Android</string>

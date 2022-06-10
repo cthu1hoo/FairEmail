@@ -353,6 +353,7 @@ The following Android permissions are **required**:
 * *prevent device from sleeping* (WAKE_LOCK): to keep the device awake while performing actions, like synchronization of messages
 * *use fingerprint hardware* (USE_FINGERPRINT) and *use biometric hardware* (USE_BIOMETRIC): to use biometric authentication (fingerprint, face unlock, etc)
 * *ask to ingore battery optimizations* (REQUEST_IGNORE_BATTERY_OPTIMIZATIONS): to disable battery optimizations, please see [this FAQ](#user-content-faq175) for more information
+* *allow the app to show notifications* (POST_NOTIFICATIONS): to show new message notifications and (account) warnings and errors (Android 13 and later only)
 * *Google Play (in-app) billing service* (BILLING): for in-app purchases
 
 <br />
@@ -2561,6 +2562,17 @@ $$automatic$ (since version 1.1862)
 Note that *regex* should be disable and that there should be no white space.
 
 Please be aware that a difference in the *from* and *reply-to* domain, and no or multi *from* addresses isn't a good indication of spam.
+
+Since the app sets the keyword *$Filtered$* after the rules have been executed for a message,
+you can create a rule to prevent the rules from being executed again (which is sometimes desirable):
+
+* Name: anything you like
+* Order: lower than all other rules, for example 0
+* Stop processing rules after executing this rule: enabled
+* Header contains: *$$Filtered$* (no spaces)
+* Action: No action
+
+Note that not all email servers support IMAP keywords.
 
 <br />
 

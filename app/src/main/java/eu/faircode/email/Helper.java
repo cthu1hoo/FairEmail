@@ -184,8 +184,6 @@ public class Helper {
     static final String SUPPORT_URI = "https://contact.faircode.eu/";
     static final String TEST_URI = "https://play.google.com/apps/testing/" + BuildConfig.APPLICATION_ID;
     static final String BIMI_PRIVACY_URI = "https://datatracker.ietf.org/doc/html/draft-brotman-ietf-bimi-guidance-03#section-7.4";
-    static final String GRAVATAR_PRIVACY_URI = "https://automattic.com/privacy/";
-    static final String LIBRAVATAR_PRIVACY_URI = "https://www.libravatar.org/privacy/";
     static final String ID_COMMAND_URI = "https://datatracker.ietf.org/doc/html/rfc2971#section-3.1";
     static final String AUTH_RESULTS_URI = "https://datatracker.ietf.org/doc/html/rfc7601";
     static final String FAVICON_PRIVACY_URI = "https://en.wikipedia.org/wiki/Favicon";
@@ -429,7 +427,7 @@ public class Helper {
         try {
             PackageManager pm = context.getPackageManager();
             if (pm.hasSystemFeature(PackageManager.FEATURE_WEBVIEW)) {
-                new WebView(context);
+                new WebViewEx(context);
                 return true;
             } else
                 return false;
@@ -441,6 +439,25 @@ public class Helper {
                     at eu.faircode.email.ApplicationEx.onCreate(SourceFile:110)
                     at android.app.Instrumentation.callApplicationOnCreate(Instrumentation.java:1014)
                     at android.app.ActivityThread.handleBindApplication(ActivityThread.java:4751)
+
+                    Chromium WebView package does not exist
+                    android.webkit.WebViewFactory$MissingWebViewPackageException: Failed to load WebView provider: No WebView installed
+                        at android.webkit.WebViewFactory.getWebViewContextAndSetProvider(WebViewFactory.java:428)
+                        at android.webkit.WebViewFactory.getProviderClass(WebViewFactory.java:493)
+                        at android.webkit.WebViewFactory.getProvider(WebViewFactory.java:348)
+                        at android.webkit.WebView.getFactory(WebView.java:2594)
+                        at android.webkit.WebView.ensureProviderCreated(WebView.java:2588)
+                        at android.webkit.WebView.setOverScrollMode(WebView.java:2656)
+                        at android.view.View.<init>(View.java:5325)
+                        at android.view.View.<init>(View.java:5466)
+                        at android.view.ViewGroup.<init>(ViewGroup.java:702)
+                        at android.widget.AbsoluteLayout.<init>(AbsoluteLayout.java:56)
+                        at android.webkit.WebView.<init>(WebView.java:421)
+                        at android.webkit.WebView.<init>(WebView.java:363)
+                        at android.webkit.WebView.<init>(WebView.java:345)
+                        at android.webkit.WebView.<init>(WebView.java:332)
+                        at android.webkit.WebView.<init>(WebView.java:322)
+                        at eu.faircode.email.WebViewEx.<init>(SourceFile:1)
              */
             return false;
         }

@@ -155,6 +155,7 @@
     <string name="title_setup_accounts">Konten</string>
     <string name="title_setup_identities">Identitäten</string>
     <string name="title_setup_other">Anderer Anbieter</string>
+    <string name="title_setup_inbound">Nur eingehende Nachrichten (E-Mails können nicht gesendet werden!)</string>
     <string name="title_setup_pop3">POP3-Konto</string>
     <string name="title_setup_oauth_permission">Der E-Mail-Anbieter hat OAuth nur für die Play-Store- und GitHub-Version freigegeben</string>
     <string name="title_setup_gmail_support">Das Autorisieren von Google-Konten funktioniert nur in der Play-Store- und in der GitHub-Version, weil Android die digitale App-Signatur überprüft</string>
@@ -187,6 +188,8 @@
     <string name="title_setup_permissions">Berechtigungen erteilen</string>
     <string name="title_setup_permissions_remark">Um auf Kontaktinformationen zuzugreifen (optional)</string>
     <string name="title_setup_permissions_explanation">Der Zugriff auf Kontakte ist erforderlich, um Kontaktinformationen nachzuschlagen und Kontakte vorzuschlagen</string>
+    <string name="title_setup_permissions_notify">So können Sie sich über neue Nachrichten benachrichtigen lassen (optional)</string>
+    <string name="title_setup_permissions_notify_explanation">Benachrichtigungsberechtigungen sind erforderlich, um Benachrichtigungen für neue Nachrichten in der Statusleiste anzuzeigen</string>
     <string name="title_setup_permission_why">Welche Berechtigungen werden benötigt und warum?</string>
     <string name="title_setup_permission_import_contacts">Wie kann ich Kontakte importieren?</string>
     <string name="title_setup_doze">Akkuoptimierung deaktivieren</string>
@@ -210,6 +213,7 @@
     <string name="title_setup_still">Noch zu tun</string>
     <string name="title_setup_error">Fehler</string>
     <string name="title_setup_pop">POP3 verwenden (nicht empfohlen)</string>
+    <string name="title_setup_recent">\'Recent\' für mehrere E-Mail-Clients verwenden</string>
     <string name="title_setup_configuring">Konto wird konfiguriert &#8230;</string>
     <string name="title_setup_app_password">Möglicherweise müssen Sie ein App-Passwort verwenden</string>
     <string name="title_setup_extra">Extra</string>
@@ -522,8 +526,6 @@
     <string name="title_advanced_notifications_default">Standardkanal</string>
     <string name="title_advanced_notifications_service">Überwachungskanal</string>
     <string name="title_advanced_notifications_newest_first">Neueste Benachrichtigungen zuerst anzeigen</string>
-    <string name="title_advanced_notifications_background">Hintergrunddienst verwenden, um Nachrichten zu synchronisieren</string>
-    <string name="title_advanced_notifications_background_hint">Ein Hintergrunddienst kann jederzeit von Android angehalten werden, erfordert aber keine Benachrichtigung in der Statusleiste</string>
     <string name="title_advanced_badge">Startsymbol mit der Anzahl der neuen Nachrichten anzeigen</string>
     <string name="title_advanced_unseen_ignored">Anzahl der neuen Nachrichten mit der Anzahl der Benachrichtigungen übereinstimmen lassen</string>
     <string name="title_advanced_notify_background">Benachrichtigungen nur anzeigen, wenn FairEmail im Hintergrund ausgeführt wird</string>
@@ -553,6 +555,8 @@
     <string name="title_advanced_light">Benachrichtigungslicht verwenden</string>
     <string name="title_advanced_sound">Benachrichtigungston auswählen</string>
     <string name="title_advanced_notify_screen_on">Kurzes Einschalten des Bildschirms für Benachrichtigungen über neue Nachrichten</string>
+    <string name="title_advanced_notifications_background">Hintergrunddienst verwenden, um Nachrichten zu synchronisieren</string>
+    <string name="title_advanced_notifications_background_hint">Ein Hintergrunddienst kann jederzeit von Android angehalten werden, erfordert aber keine Benachrichtigung in der Statusleiste</string>
     <string name="title_advanced_confirm_links">Hyperlinks beim Öffnen bestätigen</string>
     <string name="title_advanced_check_links_dbl">Domain-Sperrlisten auf verdächtige Links prüfen</string>
     <string name="title_advanced_browse_links">Hyperlinks an Android übertragen</string>

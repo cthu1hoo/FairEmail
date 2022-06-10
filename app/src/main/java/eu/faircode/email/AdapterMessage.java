@@ -58,6 +58,7 @@ import android.provider.CalendarContract;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -118,7 +119,6 @@ import androidx.constraintlayout.widget.Group;
 import androidx.core.content.FileProvider;
 import androidx.core.content.pm.ShortcutInfoCompat;
 import androidx.core.graphics.ColorUtils;
-import androidx.core.os.BuildCompat;
 import androidx.core.view.MenuCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -878,8 +878,9 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
             tvSignedData = vsBody.findViewById(R.id.tvSignedData);
 
             tvBody = vsBody.findViewById(R.id.tvBody);
-            if (BuildConfig.DEBUG && BuildCompat.isAtLeastT()) {
-                tvBody.setHyphenationFrequency(4 /* HYPHENATION_FREQUENCY_FULL_FAST */);
+            if (BuildConfig.DEBUG &&
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                tvBody.setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_FULL_FAST);
                 tvBody.setBreakStrategy(LineBreaker.BREAK_STRATEGY_HIGH_QUALITY);
             }
             wvBody = vsBody.findViewById(R.id.wvBody);
@@ -2440,8 +2441,8 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
                     if (message.show_full ||
                             prefs.getBoolean(from + ".show_full", false) ||
                             prefs.getBoolean(domain + ".show_full", false)) {
-                        properties.setValue("full", message.id, true);
-                        properties.setValue("full_asked", message.id, true);
+                        properties.setValue("full", message.id, hasWebView);
+                        properties.setValue("full_asked", message.id, hasWebView);
                     }
                     if (message.show_images ||
                             prefs.getBoolean(from + ".show_images", false) ||
@@ -2463,8 +2464,8 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
             if (!confirm_html &&
                     !EntityFolder.JUNK.equals(message.folderType) &&
                     !properties.getValue("full_asked", message.id)) {
-                properties.setValue("full", message.id, true);
-                properties.setValue("full_asked", message.id, true);
+                properties.setValue("full", message.id, hasWebView);
+                properties.setValue("full_asked", message.id, hasWebView);
             }
 
             if (!properties.getValue("force_light_default", message.id)) {
@@ -2508,6 +2509,7 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
             Log.i("Bind size=" + size + " height=" + height);
 
             ibFull.setEnabled(hasWebView);
+            ibFull.setImageTintList(ColorStateList.valueOf(hasWebView ? colorAccent : colorSeparator));
             ibFull.setImageResource(show_full ? R.drawable.twotone_fullscreen_exit_24 : R.drawable.twotone_fullscreen_24);
             ibFull.setContentDescription(context.getString(show_full
                     ? R.string.title_legend_show_reformatted
@@ -6552,7 +6554,7 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
             SpannableStringBuilder ssb = new SpannableStringBuilderEx();
             for (int i = 0; i < message.keywords.length; i++) {
                 String keyword = message.keywords[i];
-                if (MessageHelper.showKeyword(keyword)) {
+                if (debug || MessageHelper.showKeyword(keyword)) {
                     if (ssb.length() > 0)
                         ssb.append(' ');
 
@@ -6888,8 +6890,8 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
         boolean contacts = Helper.hasPermission(context, Manifest.permission.READ_CONTACTS);
         boolean avatars = prefs.getBoolean("avatars", true);
         boolean bimi = prefs.getBoolean("bimi", false);
-        boolean gravatars = prefs.getBoolean("gravatars", false);
-        boolean libravatars = prefs.getBoolean("libravatars", false);
+        boolean gravatars = (prefs.getBoolean("gravatars", false) && !BuildConfig.PLAY_STORE_RELEASE);
+        boolean libravatars = (prefs.getBoolean("libravatars", false) && !BuildConfig.PLAY_STORE_RELEASE);
         boolean favicons = prefs.getBoolean("favicons", false);
         boolean generated = prefs.getBoolean("generated_icons", true);
 
