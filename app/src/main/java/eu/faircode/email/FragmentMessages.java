@@ -34,6 +34,7 @@ import static me.everything.android.ui.overscroll.OverScrollBounceEffectDecorato
 import static me.everything.android.ui.overscroll.OverScrollBounceEffectDecoratorBase.DEFAULT_TOUCH_DRAG_MOVE_RATIO_BCK;
 import static me.everything.android.ui.overscroll.OverScrollBounceEffectDecoratorBase.DEFAULT_TOUCH_DRAG_MOVE_RATIO_FWD;
 
+import android.Manifest;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.Dialog;
@@ -258,6 +259,7 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
     private ViewGroup view;
     private SwipeRefreshLayoutEx swipeRefresh;
     private TextView tvAirplane;
+    private TextView tvNotifications;
     private TextView tvSupport;
     private ImageButton ibHintSupport;
     private ImageButton ibHintSwipe;
@@ -280,6 +282,7 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
     private BottomNavigationView bottom_navigation;
     private ContentLoadingProgressBar pbWait;
     private Group grpAirplane;
+    private Group grpNotifications;
     private Group grpSupport;
     private Group grpHintSupport;
     private Group grpHintSwipe;
@@ -537,6 +540,7 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
         // Get controls
         swipeRefresh = view.findViewById(R.id.swipeRefresh);
         tvAirplane = view.findViewById(R.id.tvAirplane);
+        tvNotifications = view.findViewById(R.id.tvNotifications);
         tvSupport = view.findViewById(R.id.tvSupport);
         ibHintSupport = view.findViewById(R.id.ibHintSupport);
         ibHintSwipe = view.findViewById(R.id.ibHintSwipe);
@@ -560,6 +564,7 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
 
         pbWait = view.findViewById(R.id.pbWait);
         grpAirplane = view.findViewById(R.id.grpAirplane);
+        grpNotifications = view.findViewById(R.id.grpNotifications);
         grpSupport = view.findViewById(R.id.grpSupport);
         grpHintSupport = view.findViewById(R.id.grpHintSupport);
         grpHintSwipe = view.findViewById(R.id.grpHintSwipe);
@@ -611,6 +616,21 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
             public void onClick(View v) {
                 Intent intent = new Intent(android.provider.Settings.ACTION_AIRPLANE_MODE_SETTINGS)
                         .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                v.getContext().startActivity(intent);
+            }
+        });
+
+        tvNotifications.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent;
+                if (Helper.getTargetSdk(v.getContext()) < Build.VERSION_CODES.TIRAMISU)
+                    intent = new Intent(
+                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                            Uri.parse("package:" + BuildConfig.APPLICATION_ID));
+                else
+                    intent = new Intent(v.getContext(), ActivitySetup.class)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 v.getContext().startActivity(intent);
             }
         });
@@ -1617,6 +1637,7 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
         // Initialize
         FragmentDialogTheme.setBackground(getContext(), view, false);
         grpAirplane.setVisibility(View.GONE);
+        grpNotifications.setVisibility(View.GONE);
         tvNoEmail.setVisibility(View.GONE);
         tvNoEmailHint.setVisibility(View.GONE);
         etSearch.setVisibility(View.GONE);
@@ -4461,15 +4482,21 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
         iff.addAction(ACTION_KEYWORDS);
         lbm.registerReceiver(receiver, iff);
 
-        ConnectivityManager cm = Helper.getSystemService(getContext(), ConnectivityManager.class);
+        final Context context = getContext();
+        ConnectivityManager cm = Helper.getSystemService(context, ConnectivityManager.class);
         NetworkRequest.Builder builder = new NetworkRequest.Builder();
         builder.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
         cm.registerNetworkCallback(builder.build(), networkCallback);
 
-        updateAirplaneMode(ConnectionHelper.airplaneMode(getContext()));
-        getContext().registerReceiver(airplanemode, new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED));
+        updateAirplaneMode(ConnectionHelper.airplaneMode(context));
+        context.registerReceiver(airplanemode, new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED));
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+        boolean canNotify =
+                (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                        hasPermission(Manifest.permission.POST_NOTIFICATIONS));
+        grpNotifications.setVisibility(canNotify ? View.GONE : View.VISIBLE);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         boolean compact = prefs.getBoolean("compact", false);
         int zoom = prefs.getInt("view_zoom", compact ? 0 : 1);
         adapter.setCompact(compact);
@@ -4526,15 +4553,16 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
     public void onPause() {
         super.onPause();
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+        final Context context = getContext();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         prefs.unregisterOnSharedPreferenceChangeListener(this);
 
-        getContext().unregisterReceiver(airplanemode);
+        context.unregisterReceiver(airplanemode);
 
-        ConnectivityManager cm = Helper.getSystemService(getContext(), ConnectivityManager.class);
+        ConnectivityManager cm = Helper.getSystemService(context, ConnectivityManager.class);
         cm.unregisterNetworkCallback(networkCallback);
 
-        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(getContext());
+        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(context);
         lbm.unregisterReceiver(receiver);
     }
 

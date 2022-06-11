@@ -38,6 +38,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -162,6 +163,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
 public class Helper {
+    private static Integer targetSdk = null;
     private static Boolean hasWebView = null;
     private static Boolean hasPlayStore = null;
     private static Boolean hasValidFingerprint = null;
@@ -389,6 +391,14 @@ public class Helper {
         return true;
     }
 
+    static String[] getDesiredPermissions(Context context) {
+        List<String> permissions = new ArrayList<>();
+        permissions.add(Manifest.permission.READ_CONTACTS);
+        if (getTargetSdk(context) >= Build.VERSION_CODES.TIRAMISU)
+            permissions.add(Manifest.permission.POST_NOTIFICATIONS);
+        return permissions.toArray(new String[0]);
+    }
+
     static String[] getOAuthPermissions() {
         List<String> permissions = new ArrayList<>();
         //permissions.add(Manifest.permission.READ_CONTACTS); // profile
@@ -427,7 +437,8 @@ public class Helper {
         try {
             PackageManager pm = context.getPackageManager();
             if (pm.hasSystemFeature(PackageManager.FEATURE_WEBVIEW)) {
-                new WebViewEx(context);
+                WebView view = new WebView(context);
+                view.setOverScrollMode(View.OVER_SCROLL_NEVER);
                 return true;
             } else
                 return false;
@@ -996,6 +1007,19 @@ public class Helper {
         return 0;
     }
 
+    static int getTargetSdk(Context context) {
+        if (targetSdk == null)
+            try {
+                PackageManager pm = context.getPackageManager();
+                ApplicationInfo ai = pm.getApplicationInfo(BuildConfig.APPLICATION_ID, 0);
+                targetSdk = ai.targetSdkVersion;
+            } catch (Throwable ex) {
+                Log.e(ex);
+                targetSdk = Build.VERSION.SDK_INT;
+            }
+        return targetSdk;
+    }
+
     static boolean isSupportedDevice() {
         if ("Amazon".equals(Build.BRAND) && Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
         /*
@@ -1440,6 +1464,7 @@ public class Helper {
     }
 
     static boolean isDarkTheme(Context context) {
+        // R.attr.isLightTheme
         TypedValue tv = new TypedValue();
         context.getTheme().resolveAttribute(R.attr.themeName, tv, true);
         return (tv.string != null && !"light".contentEquals(tv.string));
