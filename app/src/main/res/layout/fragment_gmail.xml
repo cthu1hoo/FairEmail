@@ -159,7 +159,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:drawableEnd="@drawable/twotone_open_in_new_12"
+            android:drawableEnd="@drawable/twotone_open_in_new_24"
             android:drawablePadding="6dp"
             android:drawableTint="?android:attr/textColorLink"
             android:text="@string/title_setup_gmail_password"

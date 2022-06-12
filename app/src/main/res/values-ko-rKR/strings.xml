@@ -65,6 +65,9 @@
     <string name="title_block_sender_domain">도메인 \'%1$s\' 차단</string>
     <string name="title_block_sender_hint">발신자를 차단하는 것은 무료 기능입니다. 발신자 도메인을 차단하는 것은 유료 기능인 필터 규칙을 사용합니다.    </string>
     <string name="title_blocked_senders">차단한 발신자</string>
+    <plurals name="title_ask_block_sender">
+        <item quantity="other">%1$s 메시지를 보낸 이를 차단하겠습니까?</item>
+    </plurals>
     <string name="title_junk_filter">로컬 스팸 필터 사용</string>
     <string name="title_junk_filter_hint">배터리 사용량이 증가할 수 있으며 스팸 메일로 잘못 인식할 수도 있습니다.</string>
     <string name="title_junk_blocklist">스팸 차단 목록 사용</string>
@@ -140,7 +143,6 @@
     <string name="title_setup_gmail_rationale">계정을 설정하고 이름을 읽기 위해 권한을 허용해 주세요</string>
     <string name="title_setup_gmail_permissions">Google은 이메일 읽기, 쓰기, 보내기 및 영구 삭제 권한을 요구합니다. FairEmail은 당신의 허락 없이는 절대로 이메일을 삭제하지 않습니다.</string>
     <string name="title_setup_gmail_drafts">IMAP으로 임시보관함을 접근할 수 없다면, 이는 Gmail 라벨 설정에서 수정할 수 있습니다.</string>
-    <string name="title_setup_gmail_password">계정을 비밀번호로 인증하고 싶습니다.</string>
     <string name="title_setup_oauth_updated">계정 인증이 갱신되었습니다</string>
     <string name="title_setup_oauth_authorize">인증</string>
     <string name="title_setup_select_account">계정 선택</string>
@@ -160,6 +162,7 @@
     <string name="title_setup_doze_why">왜 배터리 최적화를 꺼야 하나요?</string>
     <string name="title_setup_doze_stopped">동기화가 중단되었습니까?</string>
     <string name="title_setup_doze_device">이 기기에 필요한 작업으로 예상됩니다</string>
+    <string name="title_setup_alarm_12">앱이 작동하지 않습니다</string>
     <string name="title_setup_inbox">받은편지함으로 이동</string>
     <string name="title_setup_go">시작</string>
     <string name="title_setup_to_do">할 일</string>
@@ -280,7 +283,9 @@
     <string name="title_advanced_identicons">아이덴티콘 표시</string>
     <string name="title_advanced_circular">둥근 아이콘 표시</string>
     <string name="title_advanced_color_value">밝기: %1$s %%</string>
+    <string name="title_advanced_highlight_subject">제목 강조</string>
     <string name="title_advanced_highlight_color">강조 색</string>
+    <string name="title_advanced_labels">메시지 헤더에 Gmail 레이블 표시</string>
     <string name="title_advanced_flags">즐겨찾기 보기</string>
     <string name="title_advanced_preview">메시지 미리보기 표시</string>
     <string name="title_advanced_preview_italic">메시지 미리보기를 기울임꼴로 표시</string>

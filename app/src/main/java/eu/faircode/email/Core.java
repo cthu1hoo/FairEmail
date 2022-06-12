@@ -1992,6 +1992,9 @@ class Core {
         boolean plain_text = jargs.optBoolean(0);
         String charset = jargs.optString(1, null);
 
+        if (message.uid == null)
+            throw new IllegalArgumentException("uid missing");
+
         // Download message body
         DB db = DB.getInstance(context);
 
@@ -3283,6 +3286,9 @@ class Core {
             boolean delete_unseen = prefs.getBoolean("delete_unseen", false);
             boolean use_modseq = prefs.getBoolean("use_modseq", true);
             boolean perform_expunge = prefs.getBoolean("perform_expunge", true);
+
+            if (account.isYahoo() || account.isAol())
+                sync_nodate = false;
 
             if (account.isZoho()) {
                 sync_unseen = false;

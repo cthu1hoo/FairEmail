@@ -3109,37 +3109,35 @@ public class MessageHelper {
                     return null;
                 }
 
-                String result;
+                // Check character set
+                String charset = h.contentType.getParameter("charset");
+                if (UnknownCharsetProvider.charsetForMime(charset) == null)
+                    warnings.add(context.getString(R.string.title_no_charset, charset));
 
+                if (TextUtils.isEmpty(charset) ||
+                        charset.equalsIgnoreCase(StandardCharsets.US_ASCII.name()))
+                    charset = null;
+
+                Charset cs = null;
+                if (charset != null)
+                    try {
+                        cs = Charset.forName(charset);
+                    } catch (UnsupportedCharsetException ignored) {
+                        cs = null;
+                    }
+
+                String result;
                 try {
                     Object content;
 
                     // Check for UTF-16 LE without BOM
-                    String pcharset = h.contentType.getParameter("charset");
-                    if ("utf-16".equalsIgnoreCase(pcharset) && override == null) {
-                        String charset = pcharset;
+                    if (StandardCharsets.UTF_16.equals(cs) && override == null) {
                         BufferedInputStream bis = new BufferedInputStream(h.part.getDataHandler().getInputStream());
-                        byte[] bytes = new byte[64];
-                        bis.mark(bytes.length);
-                        int count = bis.read(bytes);
-                        if (count > 32) {
-                            int s = ((bytes[0] & 0xff) << 8) | (bytes[1] & 0xff);
-                            boolean bom = (s == 0xfeff || s == 0xfffe);
-                            if (!bom) {
-                                boolean le = true;
-                                for (int i = 1; i < count; i += 2)
-                                    if (bytes[i] != 0) {
-                                        le = false;
-                                        break;
-                                    }
-                                if (le) {
-                                    charset = StandardCharsets.UTF_16LE.name();
-                                    Log.e("Charset " + pcharset + " -> " + charset);
-                                }
-                            }
+                        if (Boolean.TRUE.equals(CharsetHelper.isUTF16LE(bis))) {
+                            Log.e("Charset " + cs + " -> UTF16LE");
+                            cs = StandardCharsets.UTF_16LE;
                         }
-                        bis.reset();
-                        content = Helper.readStream(bis, Charset.forName(charset));
+                        content = Helper.readStream(bis, cs);
                     } else
                         content = h.part.getContent();
 
@@ -3157,15 +3155,8 @@ public class MessageHelper {
                         // Typically com.sun.mail.util.QPDecoderStream
                         if (BuildConfig.DEBUG && false)
                             warnings.add(content.getClass().getName());
-                        Charset charset;
-                        try {
-                            String cs = h.contentType.getParameter("charset");
-                            charset = (cs == null ? StandardCharsets.ISO_8859_1 : Charset.forName(cs));
-                        } catch (Throwable ex) {
-                            Log.w(ex);
-                            charset = StandardCharsets.ISO_8859_1;
-                        }
-                        result = Helper.readStream((InputStream) content, charset);
+                        result = Helper.readStream((InputStream) content,
+                                cs == null ? StandardCharsets.ISO_8859_1 : cs);
                     } else {
                         Log.e(content.getClass().getName());
                         result = content.toString();
@@ -3185,24 +3176,9 @@ public class MessageHelper {
                     return null;
                 }
 
-                // Check character set
-                String charset = h.contentType.getParameter("charset");
-                if (UnknownCharsetProvider.charsetForMime(charset) == null)
-                    warnings.add(context.getString(R.string.title_no_charset, charset));
-
-                if ((TextUtils.isEmpty(charset) || charset.equalsIgnoreCase(StandardCharsets.US_ASCII.name())))
-                    charset = null;
-
-                Charset cs = null;
-                try {
-                    if (charset != null)
-                        cs = Charset.forName(charset);
-                } catch (UnsupportedCharsetException ignored) {
-                }
-
                 if (h.isPlainText()) {
                     if (override == null) {
-                        if (charset == null || StandardCharsets.ISO_8859_1.equals(cs)) {
+                        if (cs == null || StandardCharsets.ISO_8859_1.equals(cs)) {
                             if (StandardCharsets.ISO_8859_1.equals(cs) && CharsetHelper.isUTF8(result)) {
                                 Log.i("Charset upgrade=UTF8");
                                 result = new String(result.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
@@ -3270,38 +3246,39 @@ public class MessageHelper {
                         try {
                             if (CHARSET16.contains(cs)) {
                                 Charset detected = CharsetHelper.detect(result, cs);
-                                // UTF-16 can be detected as US-ASCII
                                 if (!CHARSET16.contains(detected))
                                     Log.w(new Throwable("Charset=" + cs + " detected=" + detected));
+                                // UTF-16 can be detected as US-ASCII
                                 if (StandardCharsets.UTF_8.equals(detected)) {
-                                    charset = null;
-                                    result = new String(result.getBytes(StandardCharsets.ISO_8859_1), detected);
+                                    cs = null;
+                                    result = new String(result.getBytes(cs), detected);
                                 }
                             }
                         } catch (Throwable ex) {
                             Log.w(ex);
                         }
 
-                        if (charset == null) {
+                        if (cs == null) {
                             // <meta charset="utf-8" />
                             // <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
                             String excerpt = result.substring(0, Math.min(MAX_META_EXCERPT, result.length()));
                             Document d = JsoupEx.parse(excerpt);
                             for (Element meta : d.select("meta")) {
+                                String mcharset = null;
                                 if ("Content-Type".equalsIgnoreCase(meta.attr("http-equiv"))) {
                                     try {
                                         ContentType ct = new ContentType(meta.attr("content"));
-                                        charset = ct.getParameter("charset");
+                                        mcharset = ct.getParameter("charset");
                                     } catch (ParseException ex) {
                                         Log.w(ex);
                                     }
                                 } else
-                                    charset = meta.attr("charset");
+                                    mcharset = meta.attr("charset");
 
-                                if (!TextUtils.isEmpty(charset))
+                                if (!TextUtils.isEmpty(mcharset))
                                     try {
                                         Log.i("Charset meta=" + meta);
-                                        Charset c = Charset.forName(charset);
+                                        Charset c = Charset.forName(mcharset);
 
                                         // US-ASCII is a subset of ISO8859-1
                                         if (StandardCharsets.US_ASCII.equals(c))

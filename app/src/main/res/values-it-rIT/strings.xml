@@ -163,7 +163,7 @@
     <string name="title_setup_gmail_rationale">Sei pregato di garantire i permessi per selezionare un profilo e leggere il tuo nome</string>
     <string name="title_setup_gmail_permissions">Google chiederà le autorizzazioni per leggere, scrivere, inviare ed eliminare permanentemente tutte le tue email. FairEmail non eliminerà mai i tuoi messaggi senza il tuo consenso esplicito.</string>
     <string name="title_setup_gmail_drafts">Se la cartella delle bozze non è accessibile da IMAP, questo è risolvibile nelle impostazioni dell\'etichetta di Gmail</string>
-    <string name="title_setup_gmail_password">Voglio autorizzare un profilo con una password</string>
+    <string name="title_setup_gmail_password">Voglio autorizzare un account con una password invece di un account sul dispositivo</string>
     <string name="title_setup_office_auth">L\'errore \'AUTHENTICATE fallita\' può esser causato dalla disabilitazione di IMAP/SMTP dall\'amministratore di sistema</string>
     <string name="title_setup_oauth_rationale">Autorizza l\'accesso al tuo profilo di %1$s</string>
     <string name="title_setup_oauth_update">Autorizza nuovamente un profilo esistente (altrimenti creane uno nuovo)</string>
@@ -1258,6 +1258,8 @@
     <string name="title_encrypt">Crittografa</string>
     <string name="title_decrypt">Decrittografa</string>
     <string name="title_resync">Risincronizza</string>
+    <string name="title_charset">Codifica</string>
+    <string name="title_charset_auto">Automatico</string>
     <string name="title_alternative_text">Mostra il testo semplice</string>
     <string name="title_alternative_html">Mostra HTML</string>
     <string name="title_no_openpgp">OpenKeychain non trovato</string>
@@ -1580,6 +1582,7 @@
     <string name="title_hint_folder_actions">Tieni premuta una cartella per le opzioni, come aggiungere una cartella al menu di navigazione per l\'accesso rapido</string>
     <string name="title_hint_folder_sync">Per limitare l\'uso della batteria e di rete, non tutte le cartelle e messaggi saranno sincronizzati di default</string>
     <string name="title_hint_airplane">La modalità offline è attivata</string>
+    <string name="title_hint_notification">Le notifiche sono disabilitate</string>
     <string name="title_hint_support">Se hai una domanda o un problema, sei pregato di usare il menu di supporto per ricevere aiuto</string>
     <string name="title_hint_message_actions">Scorri a sinistra per cestinare; Scorri a destra per archiviare (se disponibile); Le azioni di scorrimento sono configurabili nelle impostazioni del profilo</string>
     <string name="title_hint_message_selection">Tieni premuto un messaggio per iniziare a selezionare più messaggi: Tieni premuto e scorri in su o in giù per selezionare più messaggi</string>

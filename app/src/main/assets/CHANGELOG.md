@@ -4,6 +4,27 @@
 
 ### [Juratyrant](https://en.wikipedia.org/wiki/Juratyrant)
 
+### 1.1913 - 2022-06-12
+
+* Fixed asking for permissions on Android 12 and before
+* Small improvements and minor bug fixes
+* Updated translations
+
+### 1.1912 - 2022-06-11
+
+* Targetting SDK 33 (Android 13)
+* Small improvements and minor bug fixes
+* Updated AndroidX Webkit
+* Updated translations
+
+### 1.1911 - 2022-06-11
+
+* Added encoding (character set) override option
+* Added UTF-16 endianness detection
+* Small improvements and minor bug fixes
+* Updated AndroidX and material design library
+* Updated translations
+
 ### 1.1910 - 2022-06-10
 
 * Fixed dark theme / original message view on Android 12 and before

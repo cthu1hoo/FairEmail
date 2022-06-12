@@ -335,6 +335,7 @@ Fonts, sizes, colors, etc should be material design whenever possible.
 * [(177) What does 'Sensitivity' mean?](#user-content-faq177)
 * [(178) Why are widgets not updating?](#user-content-faq178)
 * [(179) What are reply templates?](#user-content-faq179)
+* [(180) How do I use LanguageTool?](#user-content-faq180)
 
 [I have another question.](#user-content-get-support)
 
@@ -1931,6 +1932,8 @@ or by Android not supporting older protocols anymore, like SSLv3.
 Android 8 Oreo and later [do not support](https://developer.android.com/about/versions/oreo/android-8.0-changes#security-all) SSLv3 anymore.
 There is no way to workaround lacking RC4 and SSLv3 support because it has completely been removed from Android (which should say something).
 
+Please [see here](https://developer.android.com/reference/javax/net/ssl/SSLSocket) for an overview of supported protocols and cipher suites by Android version.
+
 You can use [this website](https://ssl-tools.net/mailservers) or [this website](https://www.immuniweb.com/ssl/) to check for SSL/TLS problems of email servers.
 
 <br />
@@ -2248,7 +2251,8 @@ but even Google's Chrome cannot handle this.
 * Did you know that you can long press the folder name in the message header when viewing a conversation to navigate to the folder? (since version 1.1720)
 * Did you know that you can long press the add contact button in the message composer to insert a contact group? (since version 1.1721)
 * Did you know that you can long press the image action to show the image dialog, even if it was disabled? (since version 1.1772)
-* Did you know that you can long press the "] [" button to fit original messages to the screen width? (this might result in "thin" messages)
+* Did you know that you can long press the "] \[" button to fit original messages to the screen width? (this might result in "thin" messages)
+* Did you know that you can long press on the save drafts button for a grammar, style, and spell check?
 
 <br />
 
@@ -4749,6 +4753,16 @@ Templates can have the following options:
 * *Favorite*: template will be added in the main reply popup menu
 * *Snippet*: template will be used as text fragment (since version 1.1857)
 * *Hide from menus*: template will be hidden (disabled)
+
+<br />
+
+<a name="faq180"></a>
+**(180) How do I use LanguageTool?**
+
+After writing some text, you can long press on the save draft button to perform a grammar, style, and spell check via [LanguageTool](https://languagetool.org/).
+Texts with suggestions will be marked and if you tap on a marked suggestion,
+it will be shown by the keyboard if the keyboard supports this,
+else you can double tap or long press the marked text to show suggestions.
 
 <br />
 
