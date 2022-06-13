@@ -56,6 +56,7 @@ import android.os.Parcel;
 import android.os.PowerManager;
 import android.os.StatFs;
 import android.os.storage.StorageManager;
+import android.provider.Browser;
 import android.provider.Settings;
 import android.security.KeyChain;
 import android.security.KeyChainAliasCallback;
@@ -102,6 +103,8 @@ import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Lifecycle;
@@ -857,7 +860,27 @@ public class Helper {
                     .setStartAnimations(context, R.anim.activity_open_enter, R.anim.activity_open_exit)
                     .setExitAnimations(context, R.anim.activity_close_enter, R.anim.activity_close_exit);
 
+            Locale locale = Locale.getDefault();
+            Locale slocale = Resources.getSystem().getConfiguration().locale;
+
+            List<String> languages = new ArrayList<>();
+            languages.add(locale.toLanguageTag() + ";q=1.0");
+            if (!TextUtils.isEmpty(locale.getLanguage()))
+                languages.add(locale.getLanguage() + ";q=0.9");
+            if (!slocale.equals(locale)) {
+                languages.add(slocale.toLanguageTag() + ";q=0.8");
+                if (!TextUtils.isEmpty(slocale.getLanguage()))
+                    languages.add(slocale.getLanguage() + ";q=0.7");
+            }
+            languages.add("*;q=0.5");
+            Log.i("MMM " + TextUtils.join(", ", languages));
+
+            Bundle headers = new Bundle();
+            // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Language
+            headers.putString("Accept-Language", TextUtils.join(", ", languages));
+
             CustomTabsIntent customTabsIntent = builder.build();
+            customTabsIntent.intent.putExtra(Browser.EXTRA_HEADERS, headers);
             try {
                 customTabsIntent.launchUrl(context, uri);
             } catch (Throwable ex) {
@@ -1472,8 +1495,7 @@ public class Helper {
 
     static void showKeyboard(final View view) {
         final Context context = view.getContext();
-        InputMethodManager imm =
-                (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        InputMethodManager imm = Helper.getSystemService(context, InputMethodManager.class);
         if (imm == null)
             return;
 
@@ -1492,8 +1514,7 @@ public class Helper {
 
     static void hideKeyboard(final View view) {
         final Context context = view.getContext();
-        InputMethodManager imm =
-                (InputMethodManager) context.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        InputMethodManager imm = Helper.getSystemService(context, InputMethodManager.class);
         if (imm == null)
             return;
 
@@ -1502,6 +1523,25 @@ public class Helper {
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         } catch (Throwable ex) {
             Log.e(ex);
+        }
+    }
+
+    static boolean isKeyboardVisible(final View view) {
+        try {
+            if (view == null)
+                return false;
+            View root = view.getRootView();
+            if (root == null)
+                return false;
+            WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(root);
+            if (insets == null)
+                return false;
+            boolean visible = insets.isVisible(WindowInsetsCompat.Type.ime());
+            Log.i("isKeyboardVisible=" + visible);
+            return visible;
+        } catch (Throwable ex) {
+            Log.e(ex);
+            return false;
         }
     }
 
