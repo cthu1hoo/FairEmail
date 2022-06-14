@@ -1952,20 +1952,19 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
             tvNoInternetBody.setVisibility(suitable || content ? View.GONE : View.VISIBLE);
             grpDownloading.setVisibility(content ? View.GONE : View.VISIBLE);
 
-            int height = properties.getHeight(message.id, 0);
-            if (height == 0) {
-                tvBody.setVisibility(View.GONE);
+            boolean show_full = properties.getValue("full", message.id);
+            if (show_full)
                 wvBody.setVisibility(View.GONE);
-            } else {
-                boolean show_full = properties.getValue("full", message.id);
-                if (show_full) {
-                    wvBody.setVisibility(View.INVISIBLE);
-                    wvBody.setMinimumHeight(height);
-                } else {
+            else {
+                int height = properties.getHeight(message.id, 0);
+                if (height == 0)
+                    tvBody.setVisibility(View.GONE);
+                else {
                     tvBody.setVisibility(View.INVISIBLE);
                     tvBody.setMinHeight(height);
                 }
             }
+
             vwRipple.setVisibility(View.GONE);
             pbBody.setVisibility(View.GONE);
 
@@ -2572,7 +2571,7 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
                     wvBody = webView;
                 }
 
-                webView.setMinimumHeight(height);
+                webView.setMinimumHeight(dp60);
 
                 int maxHeight = (rv == null ? 0 : rv.getHeight() - rv.getPaddingTop());
                 webView.init(height, maxHeight, size, position, force_light,
@@ -5945,8 +5944,9 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
                         return null;
 
                     if (!TextUtils.isEmpty(message.inreplyto))
-                        for (EntityMessage m : db.message().getMessagesByMsgId(message.account, message.inreplyto))
-                            map.put(m.msgid, m);
+                        for (String inreplyto : message.inreplyto.split(" "))
+                            for (EntityMessage m : db.message().getMessagesByMsgId(message.account, inreplyto))
+                                map.put(m.msgid, m);
 
                     if (!TextUtils.isEmpty(message.references))
                         for (String ref : message.references.split(" "))
@@ -5971,7 +5971,8 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
                         start = ssb.length();
                         ssb.append("In-reply-to: ");
                         ssb.setSpan(new StyleSpan(Typeface.BOLD), start, ssb.length(), 0);
-                        ssb.append(message.inreplyto).append("\n");
+                        for (String inreplyto : message.inreplyto.split(" "))
+                            ssb.append(inreplyto).append("\n");
                     }
 
                     if (!TextUtils.isEmpty(message.references)) {

@@ -4,7 +4,11 @@
 
 ### [Juratyrant](https://en.wikipedia.org/wiki/Juratyrant)
 
-### Next version
+### 1.1915 - 2022-06-14
+
+* Fixed initializing option values
+
+### 1.1914 - 2022-06-13
 
 * Added option for automatic hyphenation
 * Improved Android 13 compatibility

@@ -3287,11 +3287,8 @@ class Core {
             boolean use_modseq = prefs.getBoolean("use_modseq", true);
             boolean perform_expunge = prefs.getBoolean("perform_expunge", true);
 
-            if (account.isYahoo() || account.isAol()) {
+            if (account.isYahoo() || account.isAol())
                 sync_nodate = false;
-                sync_unseen = false;
-                sync_flagged = false;
-            }
 
             if (account.isZoho()) {
                 sync_unseen = false;
@@ -4245,11 +4242,12 @@ class Core {
 
                             List<EntityMessage> all = new ArrayList<>();
 
-                            if (message.inreplyto != null) {
-                                List<EntityMessage> replied = db.message().getMessagesByMsgId(folder.account, message.inreplyto);
-                                if (replied != null)
-                                    all.addAll(replied);
-                            }
+                            if (message.inreplyto != null)
+                                for (String inreplyto : message.inreplyto.split(" ")) {
+                                    List<EntityMessage> replied = db.message().getMessagesByMsgId(folder.account, inreplyto);
+                                    if (replied != null)
+                                        all.addAll(replied);
+                                }
                             if (r.refid != null) {
                                 List<EntityMessage> refs = db.message().getMessagesByMsgId(folder.account, r.refid);
                                 if (refs != null)
@@ -4264,7 +4262,8 @@ class Core {
                                 }
 
                             for (EntityFolder f : map.values())
-                                EntityOperation.queue(context, f, EntityOperation.REPORT, message.inreplyto, label);
+                                for (String inreplyto : message.inreplyto.split(" "))
+                                    EntityOperation.queue(context, f, EntityOperation.REPORT, inreplyto, label);
                         }
                     }
                 } catch (Throwable ex) {
