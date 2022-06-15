@@ -71,6 +71,7 @@ import android.os.Debug;
 import android.os.OperationCanceledException;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.print.PrintAttributes;
 import android.print.PrintDocumentAdapter;
 import android.print.PrintJob;
@@ -6173,7 +6174,7 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
                 (filter_unknown && !EntityFolder.isOutgoing(type)) ||
                 (language_detection && !TextUtils.isEmpty(filter_language) && !outbox));
 
-        boolean none = (items == 0 && !loading && tasks == 0 && initialized);
+        boolean none = (items == 0 && !loading && initialized);
         boolean filtered = (filter_active && viewType != AdapterMessage.ViewType.SEARCH);
 
         pbWait.setVisibility(loading || tasks > 0 ? View.VISIBLE : View.GONE);
@@ -6190,6 +6191,9 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
                 " no=" + (tvNoEmail.getVisibility() == View.VISIBLE));
     }
 
+    private Long lastCpu = null;
+    private Long lastTime = null;
+
     private void updateDebugInfo() {
         if (!getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
             return;
@@ -6199,7 +6203,21 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
         long hmax = rt.maxMemory();
         long nheap = Debug.getNativeHeapAllocatedSize();
         int perc = Math.round(hused * 100f / hmax);
-        tvDebug.setText(perc + "% " + (nheap / (1024 * 1024)) + "M");
+
+        int utilization = 0;
+        long cpu = android.os.Process.getElapsedCpuTime();
+        long time = SystemClock.elapsedRealtime();
+        if (lastCpu != null) {
+            int cpuDelta = (int) (cpu - lastCpu);
+            int timeDelta = (int) (time - lastTime);
+            if (timeDelta != 0)
+                utilization = 100 * cpuDelta / timeDelta / rt.availableProcessors();
+        }
+        lastCpu = cpu;
+        lastTime = time;
+
+
+        tvDebug.setText(utilization + "%\n" + perc + "% " + (nheap / (1024 * 1024)) + "M");
     }
 
     private boolean handleThreadActions(
@@ -6890,14 +6908,6 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
 
             @Override
             protected void onExecuted(Bundle args, Void data) {
-                if (viewType == AdapterMessage.ViewType.THREAD) {
-                    PagedList<TupleMessageEx> messages = adapter.getCurrentList();
-                    if (messages != null && result.size() > 0) {
-                        Log.i("Eval undo messages=" + messages.size() + " targets=" + result.size());
-                        handleThreadActions(messages, result, null);
-                    }
-                }
-
                 FragmentActivity activity = getActivity();
                 if (!(activity instanceof ActivityView)) {
                     Log.e("Undo: activity missing");
@@ -6906,6 +6916,14 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
 
                 String title = getString(R.string.title_move_undo, getNames(result, true), result.size());
                 ((ActivityView) activity).undo(title, args, taskUndoMove, taskUndoShow);
+
+                if (viewType == AdapterMessage.ViewType.THREAD) {
+                    PagedList<TupleMessageEx> messages = adapter.getCurrentList();
+                    if (messages != null && result.size() > 0) {
+                        Log.i("Eval undo messages=" + messages.size() + " targets=" + result.size());
+                        handleThreadActions(messages, result, null);
+                    }
+                }
             }
 
             @Override

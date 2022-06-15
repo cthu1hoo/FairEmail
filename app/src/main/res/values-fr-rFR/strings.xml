@@ -465,7 +465,7 @@
     <string name="title_advanced_message_text_zoom2">Zoom du texte du message par défaut : %1$s %%</string>
     <string name="title_advanced_overview_mode">Zoomer sur les messages originaux pour les adapter à l\'écran</string>
     <string name="title_advanced_override_width">Désactiver les largeurs fixes dans les messages originaux</string>
-    <string name="title_advanced_hyphenation" comment="title_advanced_hyphenation&#10;https://developer.android.com/reference/android/widget/TextView#setHyphenationFrequency(int)&#10;Will set HYPHENATION_FREQUENCY_FULL and BREAK_STRATEGY_HIGH_QUALITY if available">Utiliser la césure automatique</string>
+    <string name="title_advanced_hyphenation">Utiliser la césure automatique</string>
     <string name="title_advanced_contrast">Utiliser un contraste élevé pour le texte du message</string>
     <string name="title_advanced_monospaced">Utiliser une police à espacement fixe pour le texte du message</string>
     <string name="title_advanced_monospaced_pre">Utiliser une police à espacement fixe pour le texte préformaté</string>
@@ -533,6 +533,7 @@
     <string name="title_advanced_unseen_ignored">Faire correspondre le nombre de nouveaux messages et le nombre de notifications</string>
     <string name="title_advanced_notify_background">Afficher les notifications en arrière-plan uniquement</string>
     <string name="title_advanced_notify_known">Afficher les notifications uniquement pour les contacts</string>
+    <string name="title_advanced_notify_suppress_in_call">Supprimer les notifications lors d\'un appel</string>
     <string name="title_advanced_notify_summary">Afficher seulement une notification récapitulative</string>
     <string name="title_advanced_notify_preview">Afficher un aperçu du message dans les notifications</string>
     <string name="title_advanced_notify_preview_all">Aperçu de tout le texte</string>
@@ -713,6 +714,7 @@
     <string name="title_advanced_safe_browsing_hint">Le serveur Google a connaissance des adresses qui sont recherchées</string>
     <string name="title_advanced_badge_hint">Disponible uniquement sur les lanceurs pris en charge</string>
     <string name="title_advanced_notify_action_hint">Trois actions au plus seront affichées</string>
+    <string name="title_advanced_notify_suppress_hint">Les notifications supprimées ne seront plus affichées de nouveau</string>
     <string name="title_advanced_notify_remove_hint">Les notifications de nouveaux messages seront toujours supprimées lors de leur balayage et du marquage des messages comme lus</string>
     <string name="title_advanced_notify_manage_hint">Appuyez sur le nom d’un canal pour définir ses propriétés</string>
     <string name="title_advanced_notify_manage_default_hint">Pour définir le son par défaut, etc.</string>

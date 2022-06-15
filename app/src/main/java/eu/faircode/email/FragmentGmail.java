@@ -606,8 +606,8 @@ public class FragmentGmail extends FragmentBase {
             protected void onExecuted(Bundle args, Void data) {
                 boolean updated = args.getBoolean("updated");
                 if (updated) {
-                    finish();
                     ToastEx.makeText(getContext(), R.string.title_setup_oauth_updated, Toast.LENGTH_LONG).show();
+                    finish();
                 } else {
                     FragmentDialogAccount fragment = new FragmentDialogAccount();
                     fragment.setArguments(args);

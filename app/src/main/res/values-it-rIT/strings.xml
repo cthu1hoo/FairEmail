@@ -465,7 +465,7 @@
     <string name="title_advanced_message_text_zoom2">Ingrandimento predefinito del testo del messaggio %1$s%%</string>
     <string name="title_advanced_overview_mode">Ingrandisci i messaggi originali per adattarsi allo schermo</string>
     <string name="title_advanced_override_width">Disabilita le larghezze fisse nei messaggi originali</string>
-    <string name="title_advanced_hyphenation" comment="title_advanced_hyphenation&#10;https://developer.android.com/reference/android/widget/TextView#setHyphenationFrequency(int)&#10;Will set HYPHENATION_FREQUENCY_FULL and BREAK_STRATEGY_HIGH_QUALITY if available">Usa la sillabazione automatica</string>
+    <string name="title_advanced_hyphenation">Usa la sillabazione automatica</string>
     <string name="title_advanced_contrast">Usa il contrasto elevato per il testo del messaggio</string>
     <string name="title_advanced_monospaced">Usa di default caratteri monospaziati per il testo del messaggio</string>
     <string name="title_advanced_monospaced_pre">Usa caratteri monospaziati per il testo preformattato</string>
@@ -533,6 +533,7 @@
     <string name="title_advanced_unseen_ignored">Lascia che il numero di nuovi messaggi corrisponda al numero di notifiche</string>
     <string name="title_advanced_notify_background">Mostra le notifiche solo quando in background</string>
     <string name="title_advanced_notify_known">Mostra le notifiche solo per i contatti</string>
+    <string name="title_advanced_notify_suppress_in_call">Sopprimi le notifiche durante la chiamata</string>
     <string name="title_advanced_notify_summary">Mostra solo le notifiche del riepilogo</string>
     <string name="title_advanced_notify_preview">Mostra l\'anteprima del messaggio nelle notifiche</string>
     <string name="title_advanced_notify_preview_all">Visualizza tutto il testo</string>
@@ -713,6 +714,7 @@
     <string name="title_advanced_safe_browsing_hint">Il server di Google sa quali indirizzi sono cercati</string>
     <string name="title_advanced_badge_hint">Disponibile solo sui launcher supportati</string>
     <string name="title_advanced_notify_action_hint">Saranno mostrate al massimo tre azioni</string>
+    <string name="title_advanced_notify_suppress_hint">Le notifiche soppresse non saranno più mostrate di nuovo</string>
     <string name="title_advanced_notify_remove_hint">Le notifiche dei nuovi messaggi saranno sempre rimosse scorrendo via e contrassegnando i messaggi come letti</string>
     <string name="title_advanced_notify_manage_hint">Tocca sul nome del canale per impostare le proprietà del canale</string>
     <string name="title_advanced_notify_manage_default_hint">Per impostare il suono predefinito, etc.</string>

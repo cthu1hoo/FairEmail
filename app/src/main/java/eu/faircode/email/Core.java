@@ -4261,9 +4261,10 @@ class Core {
                                         map.put(f.id, f);
                                 }
 
-                            for (EntityFolder f : map.values())
-                                for (String inreplyto : message.inreplyto.split(" "))
-                                    EntityOperation.queue(context, f, EntityOperation.REPORT, inreplyto, label);
+                            if (message.inreplyto != null)
+                                for (EntityFolder f : map.values())
+                                    for (String inreplyto : message.inreplyto.split(" "))
+                                        EntityOperation.queue(context, f, EntityOperation.REPORT, inreplyto, label);
                         }
                     }
                 } catch (Throwable ex) {
@@ -4942,6 +4943,7 @@ class Core {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         boolean badge = prefs.getBoolean("badge", true);
         boolean notify_background_only = prefs.getBoolean("notify_background_only", false);
+        boolean notify_suppress_in_call = prefs.getBoolean("notify_suppress_in_call", false);
         boolean notify_summary = prefs.getBoolean("notify_summary", false);
         boolean notify_preview = prefs.getBoolean("notify_preview", true);
         boolean notify_preview_only = prefs.getBoolean("notify_preview_only", false);
@@ -4991,6 +4993,14 @@ class Core {
 
             if (foreground && notify_background_only && message.notifying == 0) {
                 Log.i("Notify foreground=" + message.id);
+                if (!message.ui_ignored)
+                    db.message().setMessageUiIgnored(message.id, true);
+                continue;
+            }
+
+            if (notify_suppress_in_call && message.notifying == 0 &&
+                    MediaPlayerHelper.isInCall(context)) {
+                Log.i("Notify call=" + message.id);
                 if (!message.ui_ignored)
                     db.message().setMessageUiIgnored(message.id, true);
                 continue;

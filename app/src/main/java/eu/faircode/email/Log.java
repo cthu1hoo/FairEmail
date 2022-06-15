@@ -57,6 +57,7 @@ import android.os.LocaleList;
 import android.os.OperationCanceledException;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.TransactionTooLargeException;
 import android.provider.Settings;
 import android.text.SpannableStringBuilder;
@@ -163,6 +164,7 @@ public class Log {
     private static Context ctx;
 
     private static int level = android.util.Log.INFO;
+    private static final long MAX_LOG_SIZE = 8 * 1024 * 1024L;
     private static final int MAX_CRASH_REPORTS = (BuildConfig.TEST_RELEASE ? 50 : 5);
     private static final String TAG = "fairemail";
 
@@ -1887,7 +1889,15 @@ public class Log {
 
         sb.append("\r\n");
 
-        sb.append(String.format("Processors: %d\r\n", Runtime.getRuntime().availableProcessors()));
+        int cpus = Runtime.getRuntime().availableProcessors();
+        sb.append(String.format("Processors: %d\r\n", cpus));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            long running = SystemClock.uptimeMillis() - android.os.Process.getStartUptimeMillis();
+            long cpu = android.os.Process.getElapsedCpuTime();
+            int util = (int) (running == 0 ? 0 : 100 * cpu / running / cpus);
+            sb.append(String.format("Uptime: %s CPU: %s %d%%\r\n",
+                    Helper.formatDuration(running), Helper.formatDuration(cpu), util));
+        }
 
         ActivityManager am = Helper.getSystemService(context, ActivityManager.class);
         ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
@@ -1922,25 +1932,6 @@ public class Log {
         }
 
         sb.append("\r\n");
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            try {
-                for (FileStore store : FileSystems.getDefault().getFileStores())
-                    if (!store.isReadOnly() &&
-                            store.getUsableSpace() != 0 &&
-                            !"tmpfs".equals(store.type())) {
-                        long total = store.getTotalSpace();
-                        long unalloc = store.getUnallocatedSpace();
-                        sb.append(String.format("%s %s %s/%s\r\n",
-                                store,
-                                store.type(),
-                                Helper.humanReadableByteCount(total - unalloc),
-                                Helper.humanReadableByteCount(total)));
-                    }
-                sb.append("\r\n");
-            } catch (IOException ex) {
-                sb.append(ex).append("\r\n");
-            }
 
         WindowManager wm = Helper.getSystemService(context, WindowManager.class);
         Display display = wm.getDefaultDisplay();
@@ -2435,7 +2426,7 @@ public class Log {
                 long from = new Date().getTime() - 24 * 3600 * 1000L;
                 DateFormat TF = Helper.getTimeInstance(context);
 
-                for (EntityLog entry : db.log().getLogs(from, null))
+                for (EntityLog entry : db.log().getLogs(from, null)) {
                     size += write(os, String.format("%s [%d:%d:%d:%d] %s\r\n",
                             TF.format(entry.time),
                             entry.type.ordinal(),
@@ -2443,6 +2434,11 @@ public class Log {
                             (entry.folder == null ? 0 : entry.folder),
                             (entry.message == null ? 0 : entry.message),
                             entry.data));
+                    if (size > MAX_LOG_SIZE) {
+                        size += write(os, "<truncated>\r\n");
+                        break;
+                    }
+                }
             }
 
             db.attachment().setDownloaded(attachment.id, size);
@@ -2682,6 +2678,26 @@ public class Log {
                     size += write(os, String.format("%s\r\n", ex));
                 }
                 size += write(os, "\r\n");
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    try {
+                        for (FileStore store : FileSystems.getDefault().getFileStores())
+                            if (!store.isReadOnly() &&
+                                    store.getUsableSpace() != 0 &&
+                                    !"tmpfs".equals(store.type())) {
+                                long total = store.getTotalSpace();
+                                long unalloc = store.getUnallocatedSpace();
+                                size += write(os, String.format("%s %s %s/%s\r\n",
+                                        store,
+                                        store.type(),
+                                        Helper.humanReadableByteCount(total - unalloc),
+                                        Helper.humanReadableByteCount(total)));
+                            }
+                    } catch (IOException ex) {
+                        size += write(os, String.format("%s\r\n", ex));
+                    }
+                    size += write(os, "\r\n");
+                }
 
                 size += write(os, String.format("Configuration: %s\r\n\r\n",
                         context.getResources().getConfiguration()));

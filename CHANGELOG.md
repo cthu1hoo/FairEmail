@@ -4,7 +4,19 @@
 
 ### [Juratyrant](https://en.wikipedia.org/wiki/Juratyrant)
 
-### 1.1915 - 2022-06-14
+### 1.1917 - 2022-06-14
+
+* Fixed moving to selected folder
+* Small improvements and minor bug fixes
+* Updated translations
+
+### 1.1916 - 2022-06-14
+
+* Added option to suppress new message notifications when calling
+* Small improvements and minor bug fixes
+* Updated translations
+
+### 1.1915 - 2022-06-13
 
 * Fixed initializing option values
 
