@@ -184,6 +184,7 @@ public class Helper {
     static final String PGP_END_MESSAGE = "-----END PGP MESSAGE-----";
 
     static final String PACKAGE_CHROME = "com.android.chrome";
+    static final String PACKAGE_WEBVIEW = "https://play.google.com/store/apps/details?id=com.google.android.webview";
     static final String PRIVACY_URI = "https://email.faircode.eu/privacy/";
     static final String XDA_URI = "https://forum.xda-developers.com/showthread.php?t=3824168";
     static final String SUPPORT_URI = "https://contact.faircode.eu/";
@@ -410,7 +411,7 @@ public class Helper {
         return permissions.toArray(new String[0]);
     }
 
-    static boolean hasCustomTabs(Context context, Uri uri) {
+    private static boolean hasCustomTabs(Context context, Uri uri, String pkg) {
         String scheme = (uri == null ? null : uri.getScheme());
         if (!"http".equals(scheme) && !"https".equals(scheme))
             return false;
@@ -423,6 +424,8 @@ public class Helper {
             Intent intent = new Intent();
             intent.setAction(ACTION_CUSTOM_TABS_CONNECTION);
             intent.setPackage(info.activityInfo.packageName);
+            if (pkg != null && !pkg.equals(info.activityInfo.packageName))
+                continue;
             if (pm.resolveService(intent, 0) != null)
                 return true;
         }
@@ -821,8 +824,12 @@ public class Helper {
             return;
         }
 
-        boolean has = hasCustomTabs(context, uri);
-        Log.i("View=" + uri + " browse=" + browse + " task=" + task + " has=" + has);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String open_with_pkg = prefs.getString("open_with_pkg", null);
+
+        boolean has = hasCustomTabs(context, uri, open_with_pkg);
+
+        Log.i("View=" + uri + " browse=" + browse + " task=" + task + " pkg=" + open_with_pkg + " has=" + has);
 
         if (browse || !has) {
             try {
@@ -833,12 +840,14 @@ public class Helper {
                     view.setDataAndType(uri, mimeType);
                 if (task)
                     view.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                if (UriHelper.isHyperLink(uri) &&
+                        open_with_pkg != null && isInstalled(context, open_with_pkg))
+                    view.setPackage(open_with_pkg);
                 context.startActivity(view);
             } catch (Throwable ex) {
                 reportNoViewer(context, uri, ex);
             }
         } else {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
             boolean navbar_colorize = prefs.getBoolean("navbar_colorize", false);
             int colorPrimary = resolveColor(context, R.attr.colorPrimary);
             int colorPrimaryDark = resolveColor(context, R.attr.colorPrimaryDark);
@@ -881,6 +890,10 @@ public class Helper {
 
             CustomTabsIntent customTabsIntent = builder.build();
             customTabsIntent.intent.putExtra(Browser.EXTRA_HEADERS, headers);
+
+            if (open_with_pkg != null && isInstalled(context, open_with_pkg))
+                customTabsIntent.intent.setPackage(open_with_pkg);
+
             try {
                 customTabsIntent.launchUrl(context, uri);
             } catch (Throwable ex) {

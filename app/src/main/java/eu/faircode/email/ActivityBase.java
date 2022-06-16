@@ -44,7 +44,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -758,6 +757,9 @@ abstract class ActivityBase extends AppCompatActivity implements SharedPreferenc
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
+            // Delegate to fragment first
+            if (super.onOptionsItemSelected(item))
+                return true;
             performBack();
             return true;
         }

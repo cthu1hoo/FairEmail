@@ -22,7 +22,6 @@ package eu.faircode.email;
 import static android.app.ActionBar.DISPLAY_SHOW_CUSTOM;
 import static android.app.Activity.RESULT_OK;
 
-import android.app.Activity;
 import android.app.RecoverableSecurityException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -37,9 +36,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.ResultReceiver;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -47,6 +46,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -58,6 +58,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentResultListener;
 import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.OnLifecycleEvent;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import java.io.File;
@@ -316,6 +318,18 @@ public class FragmentBase extends Fragment {
     }
 
     @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            FragmentActivity activity = getActivity();
+            if (activity != null) {
+                activity.getOnBackPressedDispatcher().onBackPressed();
+                return true;
+            }
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         EntityLog.log(getContext(), "Result class=" + this.getClass().getSimpleName() +
                 " action=" + (data == null ? null : data.getAction()) +
@@ -405,6 +419,23 @@ public class FragmentBase extends Fragment {
                         tvSubtitle.setText(subtitle);
                 }
         }
+    }
+
+    protected void setBackPressedCallback(OnBackPressedCallback backPressedCallback) {
+        FragmentActivity activity = getActivity();
+        if (activity == null)
+            return;
+        backPressedCallback.setEnabled(true);
+        getViewLifecycleOwner().getLifecycle().addObserver(new LifecycleObserver() {
+            @OnLifecycleEvent(Lifecycle.Event.ON_ANY)
+            public void onAny() {
+                Lifecycle.State state = getViewLifecycleOwner().getLifecycle().getCurrentState();
+                if (state.isAtLeast(Lifecycle.State.STARTED))
+                    activity.getOnBackPressedDispatcher().addCallback(backPressedCallback);
+                else
+                    backPressedCallback.remove();
+            }
+        });
     }
 
     private boolean isPane() {

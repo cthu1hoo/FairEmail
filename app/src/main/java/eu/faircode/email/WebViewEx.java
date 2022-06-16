@@ -21,6 +21,7 @@ package eu.faircode.email;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -39,6 +40,7 @@ import android.webkit.WebViewClient;
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 import androidx.webkit.WebSettingsCompat;
+import androidx.webkit.WebViewCompat;
 import androidx.webkit.WebViewFeature;
 
 public class WebViewEx extends WebView implements DownloadListener, View.OnLongClickListener {
@@ -81,7 +83,7 @@ public class WebViewEx extends WebView implements DownloadListener, View.OnLongC
         settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
 
-        if (WebViewEx.isFeatureSupported(WebViewFeature.SAFE_BROWSING_ENABLE))
+        if (WebViewEx.isFeatureSupported(context, WebViewFeature.SAFE_BROWSING_ENABLE))
             WebSettingsCompat.setSafeBrowsingEnabled(settings, safe_browsing);
     }
 
@@ -118,10 +120,10 @@ public class WebViewEx extends WebView implements DownloadListener, View.OnLongC
 
         // https://developer.android.com/reference/android/webkit/WebSettings#setAlgorithmicDarkeningAllowed(boolean)
         // https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme
-        boolean canDarken = WebViewEx.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING);
+        boolean canDarken = WebViewEx.isFeatureSupported(context, WebViewFeature.ALGORITHMIC_DARKENING);
         if (canDarken)
             WebSettingsCompat.setAlgorithmicDarkeningAllowed(settings, dark && !force_light);
-        setBackgroundColor(canDarken && force_light ? Color.WHITE : Color.TRANSPARENT);
+        setBackgroundColor(canDarken && dark && !force_light ? Color.TRANSPARENT : Color.WHITE);
 
         float fontSize = 16f /* Default */ *
                 (browser_zoom ? 1f : message_zoom / 100f);
@@ -352,7 +354,16 @@ public class WebViewEx extends WebView implements DownloadListener, View.OnLongC
         return (yscale > 1.01);
     }
 
-    public static boolean isFeatureSupported(String feature) {
+    public static boolean isFeatureSupported(Context context, String feature) {
+        if (WebViewFeature.ALGORITHMIC_DARKENING.equals(feature))
+            try {
+                PackageInfo pkg = WebViewCompat.getCurrentWebViewPackage(context);
+                if (pkg != null && pkg.versionCode / 100000 < 5005) // Version 102.*
+                    return false;
+            } catch (Throwable ex) {
+                Log.e(ex);
+            }
+
         try {
             return WebViewFeature.isFeatureSupported(feature);
         } catch (Throwable ex) {
