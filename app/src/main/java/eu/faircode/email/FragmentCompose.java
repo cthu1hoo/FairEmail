@@ -4362,7 +4362,9 @@ public class FragmentCompose extends FragmentBase {
 
             db.attachment().setDownloaded(attachment.id, size);
 
-            if (BuildConfig.APPLICATION_ID.equals(uri.getAuthority())) {
+            if (BuildConfig.APPLICATION_ID.equals(uri.getAuthority()) &&
+                    uri.getPathSegments().size() > 0 &&
+                    "photo".equals(uri.getPathSegments().get(0))) {
                 // content://eu.faircode.email/photo/nnn.jpg
                 File tmp = new File(context.getFilesDir(), uri.getPath());
                 Log.i("Deleting " + tmp);
@@ -4425,7 +4427,7 @@ public class FragmentCompose extends FragmentBase {
             // Reset progress on failure
             Log.e(ex);
             db.attachment().setError(attachment.id, Log.formatThrowable(ex, false));
-            throw ex;
+            return null;
         }
 
         return attachment;
@@ -5423,7 +5425,7 @@ public class FragmentCompose extends FragmentBase {
 
                 if (last_attachments != null)
                     for (EntityAttachment attachment : last_attachments)
-                        if (!attachment.available && attachment.progress == null)
+                        if (!attachment.available && attachment.progress == null && attachment.error == null)
                             EntityOperation.queue(context, data.draft, EntityOperation.ATTACHMENT, attachment.id);
 
                 db.setTransactionSuccessful();

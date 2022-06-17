@@ -2210,9 +2210,7 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
                     }
             }
 
-            if (value)
-                scrolling = false;
-
+            scrolling = false;
             updateExpanded();
             if (value)
                 handleExpand(message.id);
@@ -3185,6 +3183,9 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
                 popupMenu.getMenu().findItem(R.id.menu_reply_to_sender).setEnabled(message.content);
                 popupMenu.getMenu().findItem(R.id.menu_reply_to_all).setEnabled(message.content);
                 popupMenu.getMenu().findItem(R.id.menu_forward).setEnabled(message.content);
+                popupMenu.getMenu().findItem(R.id.menu_forward_raw)
+                        .setEnabled(message.uid != null)
+                        .setVisible(Boolean.TRUE.equals(message.raw) || message.accountProtocol == EntityAccount.TYPE_IMAP);
                 popupMenu.getMenu().findItem(R.id.menu_editasnew).setEnabled(message.content);
                 popupMenu.getMenu().findItem(R.id.menu_reply_answer).setEnabled(message.content);
 
@@ -3242,6 +3243,9 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
                             return true;
                         } else if (itemId == R.id.menu_forward) {
                             onMenuReply(message, "forward");
+                            return true;
+                        } else if (itemId == R.id.menu_forward_raw) {
+                            onActionRaw(message.id);
                             return true;
                         } else if (itemId == R.id.menu_resend) {
                             onMenuResend(message);
@@ -3555,7 +3559,7 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
                             onActionSetImportanceSelection(EntityMessage.PRIORITIY_HIGH, false);
                             return true;
                         } else if (itemId == R.string.title_raw_send) {
-                            onActionRaw();
+                            onActionRaw(null);
                             return true;
                         } else if (itemId == R.string.title_folder_inbox) {
                             onActionMoveSelection(EntityFolder.INBOX, false);
@@ -3880,12 +3884,12 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
         }.execute(this, args, "messages:set:importance");
     }
 
-    private void onActionRaw() {
+    private void onActionRaw(Long id) {
         Bundle args = new Bundle();
-        args.putLongArray("ids", getSelection());
+        args.putLongArray("ids", id == null ? getSelection() : new long[]{id});
         args.putBoolean("threads", false);
 
-        if (selectionTracker != null)
+        if (id == null && selectionTracker != null)
             selectionTracker.clearSelection();
 
         FragmentDialogForwardRaw ask = new FragmentDialogForwardRaw();
@@ -7414,7 +7418,12 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
             }
 
             handleExit();
-            finish();
+
+            FragmentActivity activity = getActivity();
+            if (activity instanceof ActivityBase)
+                ((ActivityBase) activity).onBackPressedFragment();
+            else
+                finish();
         }
     };
 
