@@ -542,7 +542,16 @@ abstract class ActivityBase extends AppCompatActivity implements SharedPreferenc
         } catch (Throwable ex) {
             if (this instanceof ActivityMain)
                 throw ex;
-            Helper.reportNoViewer(this, intent, ex);
+            if (intent.getPackage() == null)
+                Helper.reportNoViewer(this, intent, ex);
+            else {
+                intent.setPackage(null);
+                try {
+                    super.startActivity(intent);
+                } catch (Throwable exex) {
+                    Helper.reportNoViewer(this, intent, exex);
+                }
+            }
         }
     }
 
@@ -553,7 +562,16 @@ abstract class ActivityBase extends AppCompatActivity implements SharedPreferenc
             Log.logExtras(intent);
             super.startActivityForResult(intent, requestCode);
         } catch (Throwable ex) {
-            Helper.reportNoViewer(this, intent, ex);
+            if (intent.getPackage() == null)
+                Helper.reportNoViewer(this, intent, ex);
+            else {
+                intent.setPackage(null);
+                try {
+                    super.startActivityForResult(intent, requestCode);
+                } catch (Throwable exex) {
+                    Helper.reportNoViewer(this, intent, exex);
+                }
+            }
         }
     }
 

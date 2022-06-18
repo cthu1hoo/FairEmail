@@ -753,6 +753,16 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
                     Log.w(ex);
                 }
             }
+
+            @Override
+            public void onItemsAdded(@NonNull RecyclerView recyclerView, int positionStart, int itemCount) {
+                iProperties.layoutChanged();
+            }
+
+            @Override
+            public void onItemsRemoved(@NonNull RecyclerView recyclerView, int positionStart, int itemCount) {
+                iProperties.layoutChanged();
+            }
         };
         rvMessage.setLayoutManager(llm);
 
@@ -1005,16 +1015,10 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
             @Override
             public void onScrolled(@NonNull RecyclerView rv, int dx, int dy) {
                 if (dy != 0) {
-                    boolean down = (dy > 0 && rv.canScrollVertically(RecyclerView.FOCUS_DOWN));
+                    boolean down = (dy > 0 && rv.canScrollVertically(1));
                     if (scrolling != down) {
                         scrolling = down;
-                        if (!accessibility &&
-                                (viewType == AdapterMessage.ViewType.UNIFIED ||
-                                        viewType == AdapterMessage.ViewType.FOLDER))
-                            if (down)
-                                fabCompose.hide();
-                            else
-                                fabCompose.show();
+                        updateCompose();
                         updateExpanded();
                     }
                 }
@@ -2126,11 +2130,6 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
                     }
                 });
             }
-
-            if ("headers".equals(name)) {
-                scrolling = false;
-                updateExpanded();
-            }
         }
 
         @Override
@@ -2408,6 +2407,26 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
                     Log.unexpectedError(getParentFragmentManager(), ex);
                 }
             }.execute(FragmentMessages.this, args, "message:lock");
+        }
+
+        @Override
+        public void layoutChanged() {
+            rvMessage.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (scrolling &&
+                                rvMessage != null &&
+                                !rvMessage.canScrollVertically(-1)) {
+                            scrolling = false;
+                            updateCompose();
+                            updateExpanded();
+                        }
+                    } catch (Throwable ex) {
+                        Log.e(ex);
+                    }
+                }
+            });
         }
 
         @Override
@@ -4435,7 +4454,6 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
                                 positions.remove(id);
                                 attachments.remove(id);
                             }
-                            updateExpanded();
                         }
                     }
                 });
@@ -6566,6 +6584,16 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
         }
 
         return false;
+    }
+
+    private void updateCompose() {
+        if (!accessibility &&
+                (viewType == AdapterMessage.ViewType.UNIFIED ||
+                        viewType == AdapterMessage.ViewType.FOLDER))
+            if (scrolling)
+                fabCompose.hide();
+            else
+                fabCompose.show();
     }
 
     private void updateExpanded() {
