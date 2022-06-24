@@ -2,7 +2,19 @@
 
 &#x1F30E; [Google Translate](https://translate.google.com/translate?sl=en&u=https://github.com/M66B/FairEmail/blob/master/CHANGELOG.md)
 
+### [Kinnareemimus](https://en.wikipedia.org/wiki/Kinnareemimus)
+
+### Next version
+
+* Added import file to signature editor
+
 ### [Juratyrant](https://en.wikipedia.org/wiki/Juratyrant)
+
+### 1.1926 - 2022-06-23
+
+* Added workaround for crash in Chrome taking down FairEmail
+* Small improvements and minor bug fixes
+* Updated translations
 
 ### 1.1925 - 2022-06-22
 
