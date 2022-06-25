@@ -198,6 +198,7 @@ public class MessageHelper {
     static final String FLAG_NOT_DELIVERED = "$NotDelivered";
     static final String FLAG_DISPLAYED = "$Displayed";
     static final String FLAG_NOT_DISPLAYED = "$NotDisplayed";
+    static final String FLAG_COMPLAINT = "Complaint";
     static final String FLAG_LOW_IMPORTANCE = "$LowImportance";
     static final String FLAG_HIGH_IMPORTANCE = "$HighImportance";
 
@@ -1349,7 +1350,8 @@ public class MessageHelper {
                 ContentType ct = new ContentType(imessage.getContentType());
                 String reportType = ct.getParameter("report-type");
                 if ("delivery-status".equalsIgnoreCase(reportType) ||
-                        "disposition-notification".equalsIgnoreCase(reportType)) {
+                        "disposition-notification".equalsIgnoreCase(reportType) ||
+                        "feedback-report".equalsIgnoreCase(reportType)) {
                     MessageParts parts = new MessageParts();
                     getMessageParts(null, imessage, parts, null);
                     for (AttachmentPart apart : parts.attachments)
@@ -2979,7 +2981,9 @@ public class MessageHelper {
 
         boolean isReport() {
             String ct = contentType.getBaseType();
-            return Report.isDeliveryStatus(ct) || Report.isDispositionNotification(ct);
+            return (Report.isDeliveryStatus(ct) ||
+                    Report.isDispositionNotification(ct) ||
+                    Report.isFeedbackReport(ct));
         }
     }
 
@@ -4294,7 +4298,9 @@ public class MessageHelper {
                     !Part.ATTACHMENT.equalsIgnoreCase(disposition) && TextUtils.isEmpty(filename)) {
                 parts.text.add(new PartHolder(part, contentType));
             } else {
-                if (Report.isDeliveryStatus(ct) || Report.isDispositionNotification(ct))
+                if (Report.isDeliveryStatus(ct) ||
+                        Report.isDispositionNotification(ct) ||
+                        Report.isFeedbackReport(ct))
                     parts.extra.add(new PartHolder(part, contentType));
 
                 AttachmentPart apart = new AttachmentPart();
@@ -4762,6 +4768,8 @@ public class MessageHelper {
                                 this.refid = value;
                                 break;
                         }
+                    } else if (isFeedbackReport(type)) {
+                        // Feedback-Type
                     }
                 }
             } catch (Throwable ex) {
@@ -4778,6 +4786,10 @@ public class MessageHelper {
 
         boolean isDispositionNotification() {
             return isDispositionNotification(type);
+        }
+
+        boolean isFeedbackReport() {
+            return isFeedbackReport(type);
         }
 
         boolean isDelivered() {
@@ -4838,6 +4850,10 @@ public class MessageHelper {
 
         static boolean isDispositionNotification(String type) {
             return "message/disposition-notification".equalsIgnoreCase(type);
+        }
+
+        static boolean isFeedbackReport(String type) {
+            return "message/feedback-report".equalsIgnoreCase(type);
         }
     }
 }
