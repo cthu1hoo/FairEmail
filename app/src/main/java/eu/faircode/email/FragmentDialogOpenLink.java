@@ -137,6 +137,26 @@ public class FragmentDialogOpenLink extends FragmentDialogBase {
         } else
             uriTitle = null;
 
+        MailTo mailto = null;
+        if ("mailto".equals(uri.getScheme()))
+            try {
+                mailto = MailTo.parse(uri);
+            } catch (Throwable ex) {
+                Log.w(ex);
+            }
+
+        String host = uri.getHost();
+        String thost = (uriTitle == null ? null : uriTitle.getHost());
+
+        String puny = null;
+        try {
+            if (host != null)
+                puny = IDN.toASCII(host, IDN.ALLOW_UNASSIGNED);
+        } catch (Throwable ex) {
+            Log.i(ex);
+            puny = host;
+        }
+
         // Get views
         final View dview = LayoutInflater.from(context).inflate(R.layout.dialog_open_link, null);
         scroll = dview.findViewById(R.id.scroll);
@@ -183,7 +203,10 @@ public class FragmentDialogOpenLink extends FragmentDialogBase {
         ibDifferent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                etLink.setText(format(uriTitle, context));
+                Package pkg = (Package) spOpenWith.getSelectedItem();
+                Log.i("Open title uri=" + uri + " with=" + pkg);
+                boolean tabs = (pkg != null && pkg.tabs);
+                Helper.view(context, uriTitle, !tabs, !tabs);
             }
         });
 
@@ -420,28 +443,9 @@ public class FragmentDialogOpenLink extends FragmentDialogBase {
         tvTitle.setText(title);
         tvTitle.setVisibility(TextUtils.isEmpty(title) ? View.GONE : View.VISIBLE);
 
-        MailTo mailto = null;
-        if ("mailto".equals(uri.getScheme()))
-            try {
-                mailto = MailTo.parse(uri);
-            } catch (Throwable ex) {
-                Log.w(ex);
-            }
         ibSearch.setVisibility(
                 mailto != null && !TextUtils.isEmpty(mailto.getTo())
                         ? View.VISIBLE : View.GONE);
-
-        String host = uri.getHost();
-        String thost = (uriTitle == null ? null : uriTitle.getHost());
-
-        String puny = null;
-        try {
-            if (host != null)
-                puny = IDN.toASCII(host, IDN.ALLOW_UNASSIGNED);
-        } catch (Throwable ex) {
-            Log.i(ex);
-            puny = host;
-        }
 
         if (host != null && !host.equals(puny)) {
             etLink.setText(format(uri.buildUpon().encodedAuthority(puny).build(), context));
