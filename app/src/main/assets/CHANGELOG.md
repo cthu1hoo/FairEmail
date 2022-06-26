@@ -4,11 +4,12 @@
 
 ### [Kinnareemimus](https://en.wikipedia.org/wiki/Kinnareemimus)
 
-### Next version
+### 1.1927 - 2022-06-25
 
 * Added import file to signature editor
 * Added option to restore app state on start
 * Added edit account color to folder list menu
+* Added create/delete notification channel to account popup menu
 * Small improvements and minor bug fixes
 * Updated libraries
 * Updated translations

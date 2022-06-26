@@ -2596,6 +2596,7 @@ public class FragmentCompose extends FragmentBase {
     private void onActionAttachment() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.setType("*/*");
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         PackageManager pm = getContext().getPackageManager();
@@ -3041,6 +3042,7 @@ public class FragmentCompose extends FragmentBase {
                 Log.i("Using file picker");
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 intent.setType("image/*");
                 intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
                 if (intent.resolveActivity(pm) == null) // GET_CONTENT whitelisted
@@ -5713,7 +5715,7 @@ public class FragmentCompose extends FragmentBase {
 
                                     Intent thread = new Intent(v.getContext(), ActivityView.class);
                                     thread.setAction("thread:" + message.id);
-                                    thread.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    thread.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                     thread.putExtra("account", message.account);
                                     thread.putExtra("folder", message.folder);
                                     thread.putExtra("thread", message.thread);
@@ -6989,6 +6991,9 @@ public class FragmentCompose extends FragmentBase {
     }
 
     private void endSearch() {
+        if (etSearch == null)
+            return;
+
         Helper.hideKeyboard(etSearch);
         etSearch.setVisibility(View.GONE);
         clearSearch();

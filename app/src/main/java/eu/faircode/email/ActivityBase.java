@@ -273,6 +273,11 @@ abstract class ActivityBase extends AppCompatActivity implements SharedPreferenc
 
         visible = true;
 
+        if (!(this instanceof ActivityMain)) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+            prefs.edit().putString("last_activity", this.getClass().getName()).apply();
+        }
+
         boolean contacts = hasPermission(Manifest.permission.READ_CONTACTS);
         if (this.contacts != contacts &&
                 !this.getClass().equals(ActivitySetup.class) &&
@@ -290,8 +295,6 @@ abstract class ActivityBase extends AppCompatActivity implements SharedPreferenc
         super.onPause();
 
         visible = false;
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        prefs.edit().putString("last_activity", this.getClass().getName()).apply();
 
         checkAuthentication(false);
     }
