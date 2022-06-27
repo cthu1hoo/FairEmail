@@ -107,6 +107,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.activation.DataHandler;
+import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 import javax.activation.FileTypeMap;
 import javax.mail.Address;
@@ -3366,6 +3367,11 @@ public class MessageHelper {
                             w.append(report.disposition);
                     }
 
+                    if (report.isFeedbackReport()) {
+                        if (!TextUtils.isEmpty(report.feedback))
+                            w.append(report.feedback);
+                    }
+
                     if (w.length() > 0)
                         warnings.add(w.toString());
                 } else
@@ -4046,6 +4052,10 @@ public class MessageHelper {
 
                 if (part.isMimeType("multipart/mixed")) {
                     Object content = part.getContent();
+
+                    if (content instanceof String)
+                        content = parseMultipart((String) content, part.getContentType());
+
                     if (content instanceof Multipart) {
                         Multipart mp = (Multipart) content;
                         for (int i = 0; i < mp.getCount(); i++) {
@@ -4069,6 +4079,10 @@ public class MessageHelper {
                             "application/pkcs7-signature".equals(protocol) ||
                             "application/x-pkcs7-signature".equals(protocol)) {
                         Object content = part.getContent();
+
+                        if (content instanceof String)
+                            content = parseMultipart((String) content, part.getContentType());
+
                         if (content instanceof Multipart) {
                             Multipart multipart = (Multipart) content;
                             if (multipart.getCount() == 2) {
@@ -4115,6 +4129,10 @@ public class MessageHelper {
                     String protocol = ct.getParameter("protocol");
                     if ("application/pgp-encrypted".equals(protocol) || protocol == null) {
                         Object content = part.getContent();
+
+                        if (content instanceof String)
+                            content = parseMultipart((String) content, part.getContentType());
+
                         if (content instanceof Multipart) {
                             Multipart multipart = (Multipart) content;
                             if (multipart.getCount() == 2) {
@@ -4213,6 +4231,10 @@ public class MessageHelper {
             if (part.isMimeType("multipart/*")) {
                 Multipart multipart;
                 Object content = part.getContent(); // Should always be Multipart
+
+                if (content instanceof String)
+                    content = parseMultipart((String) content, part.getContentType());
+
                 if (content instanceof Multipart) {
                     multipart = (Multipart) part.getContent();
                     int count = multipart.getCount();
@@ -4367,6 +4389,30 @@ public class MessageHelper {
                 Log.w(ex);
             parts.warnings.add(Log.formatThrowable(ex, false));
         }
+    }
+
+    private Multipart parseMultipart(String text, String contentType) throws MessagingException {
+        return new MimeMultipart(new DataSource() {
+            @Override
+            public InputStream getInputStream() throws IOException {
+                return new ByteArrayInputStream(text.getBytes(StandardCharsets.ISO_8859_1));
+            }
+
+            @Override
+            public OutputStream getOutputStream() throws IOException {
+                return null;
+            }
+
+            @Override
+            public String getContentType() {
+                return contentType;
+            }
+
+            @Override
+            public String getName() {
+                return "String";
+            }
+        });
     }
 
     private void ensureEnvelope() throws MessagingException {
@@ -4709,6 +4755,7 @@ public class MessageHelper {
         String diagnostic;
         String disposition;
         String refid;
+        String feedback;
         String html;
 
         Report(String type, String content) {
@@ -4769,7 +4816,14 @@ public class MessageHelper {
                                 break;
                         }
                     } else if (isFeedbackReport(type)) {
-                        // Feedback-Type
+                        // https://datatracker.ietf.org/doc/html/rfc5965
+                        feedback = "complaint";
+                        switch (name) {
+                            case "Feedback-Type":
+                                // abuse, fraud, other, virus
+                                feedback = value;
+                                break;
+                        }
                     }
                 }
             } catch (Throwable ex) {
