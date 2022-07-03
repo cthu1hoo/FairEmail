@@ -1431,10 +1431,9 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
                 if (result == null)
                     return;
 
-                if (result.accounts.size() == 1) {
-                    for (EntityAccount account : result.accounts.keySet())
-                        onActionMoveSelectionAccount(account.id, false, result.folders);
-                } else {
+                if (result.account != null)
+                    onActionMoveSelectionAccount(result.account.id, false, result.folders);
+                else {
                     PopupMenuLifecycle popupMenu = new PopupMenuLifecycle(v.getContext(), getViewLifecycleOwner(), ibMove);
 
                     int order = 0;
@@ -4796,6 +4795,10 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
         cal.set(Calendar.MONTH, Calendar.MAY);
         cal.set(Calendar.YEAR, 2022);
 
+        long now = new Date().getTime();
+        if (now < cal.getTimeInMillis() - 30 * 24 * 3600 * 1000L)
+            return false; // Not yet
+
         if (Helper.getInstallTime(context) > cal.getTimeInMillis()) {
             prefs.edit().putBoolean("gmail_checked", true).apply();
             return false;
@@ -4803,7 +4806,6 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
 
         cal.add(Calendar.MONTH, 2);
 
-        long now = new Date().getTime();
         if (now > cal.getTimeInMillis()) {
             prefs.edit().putBoolean("gmail_checked", true).apply();
             return false;
@@ -4865,9 +4867,6 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
     }
 
     private boolean checkOutlook() {
-        if (!BuildConfig.DEBUG)
-            return false;
-
         final Context context = getContext();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         if (prefs.getBoolean("outlook_checked", false))
@@ -4882,6 +4881,10 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
         cal.set(Calendar.MONTH, Calendar.OCTOBER);
         cal.set(Calendar.YEAR, 2022);
 
+        long now = new Date().getTime();
+        if (now < cal.getTimeInMillis() - 30 * 24 * 3600 * 1000L)
+            return false; // Not yet
+
         if (Helper.getInstallTime(context) > cal.getTimeInMillis()) {
             prefs.edit().putBoolean("outlook_checked", true).apply();
             return false;
@@ -4889,7 +4892,6 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
 
         cal.add(Calendar.MONTH, 2);
 
-        long now = new Date().getTime();
         if (now > cal.getTimeInMillis()) {
             prefs.edit().putBoolean("outlook_checked", true).apply();
             return false;
@@ -9846,6 +9848,7 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
         Boolean leave_deleted;
         boolean read_only;
         List<Long> folders;
+        EntityAccount account;
         Map<EntityAccount, Boolean> accounts;
         EntityAccount copyto;
 
@@ -10029,6 +10032,9 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
             if (result.hasArchive == null) result.hasArchive = false;
             if (result.hasTrash == null) result.hasTrash = false;
             if (result.hasJunk == null) result.hasJunk = false;
+
+            if (!result.hasPop && accounts.size() == 1)
+                result.account = accounts.values().iterator().next();
 
             result.accounts = new LinkedHashMap<>();
             if (!result.hasPop) {

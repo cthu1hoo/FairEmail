@@ -241,7 +241,8 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
             "signature_images_hint",
             "gmail_checked",
             "eml_auto_confirm",
-            "open_with_pkg", "open_with_tabs"
+            "open_with_pkg", "open_with_tabs",
+            "gmail_checked", "outlook_checked"
     };
 
     @Override
@@ -1621,11 +1622,6 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
                                 editor.remove(key);
                             }
 
-                        if (BuildConfig.DEBUG) {
-                            editor.remove("gmail_checked");
-                            editor.remove("outlook_checked");
-                        }
-
                         editor.apply();
 
                         ToastEx.makeText(context, R.string.title_setup_done, Toast.LENGTH_LONG).show();
@@ -1731,7 +1727,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
         swCleanupAttachments.setChecked(prefs.getBoolean("cleanup_attachments", false));
 
         swWatchdog.setChecked(prefs.getBoolean("watchdog", true));
-        swMainLog.setChecked(prefs.getBoolean("main_log", false));
+        swMainLog.setChecked(prefs.getBoolean("main_log", true));
         swProtocol.setChecked(prefs.getBoolean("protocol", false));
         swLogInfo.setChecked(prefs.getInt("log_level", Log.getDefaultLogLevel()) <= android.util.Log.INFO);
         swDebug.setChecked(prefs.getBoolean("debug", false));

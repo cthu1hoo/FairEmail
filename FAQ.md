@@ -900,11 +900,16 @@ All key handling is delegated to the OpenKey chain app for security reasons. Thi
 Inline encrypted PGP in received messages is supported, but inline PGP signatures and inline PGP in outgoing messages is not supported,
 see [here](https://josefsson.org/inline-openpgp-considered-harmful.html) about why not.
 
+If you wish to verify a signature manually, check *Show inline attachments* and save the files *content.asc* (the signed content) and *signature.asc* (the digital signature).
+Install [GnuPG](https://www.gnupg.org/) on your preferred operating system and execute this command:
+
+```gpg --verify signature.asc.pgp content.asc```
+
 Signed-only or encrypted-only messages are not a good idea, please see here about why not:
 
-* [OpenPGP Considerations Part I](https://k9mail.github.io/2016/11/24/OpenPGP-Considerations-Part-I.html)
-* [OpenPGP Considerations Part II](https://k9mail.github.io/2017/01/30/OpenPGP-Considerations-Part-II.html)
-* [OpenPGP Considerations Part III Autocrypt](https://k9mail.github.io/2018/02/26/OpenPGP-Considerations-Part-III-Autocrypt.html)
+* [OpenPGP Considerations Part I](https://www.openkeychain.org/openpgp-considerations-part-i)
+* [OpenPGP Considerations Part II](https://www.openkeychain.org/openpgp-considerations-part-ii)
+* [OpenPGP Considerations Part III Autocrypt](https://www.openkeychain.org/openpgp-considerations-part-iii-autocrypt)
 
 Signed-only messages are supported, encrypted-only messages are not supported.
 
@@ -1389,6 +1394,8 @@ The error *... NO mailbox selected READ-ONLY ...* indicates [this Zimbra problem
 
 The Outlook specific error *... Command Error. 10 ...* probably means that the OAuth token expired or was invalidated.
 Authenticating the account again with the quick setup wizard will probably resolve this condition.
+Another possible cause is a bug in an older Exchange version, please [see here](https://bugzilla.mozilla.org/show_bug.cgi?id=886261).
+In this case the system administrator needs to update the server software.
 
 Please [see here](#user-content-faq4) for the errors *... Untrusted ... not in certificate ...*, *... Invalid security certificate (Can't verify identity of server) ...* or *... Trust anchor for certification path not found ...*
 
@@ -2264,7 +2271,7 @@ but even Google's Chrome cannot handle this.
 * Did you know that you can long press the add contact button in the message composer to insert a contact group? (since version 1.1721)
 * Did you know that you can long press the image action to show the image dialog, even if it was disabled? (since version 1.1772)
 * Did you know that you can long press the "] \[" button to fit original messages to the screen width? (this might result in "thin" messages)
-* Did you know that you can long press on the save drafts button for a grammar, style, and spell check?
+* Did you know that you can long press on the save drafts button for a grammar, style, and spell check via [LanguageTools](https://languagetool.org/)?
 
 <br />
 
@@ -3490,6 +3497,8 @@ Note that:
 * Play Store purchases cannot be used without the Play Store app/services
 * Play Store purchases cannot be transferred to another account
 * You can't restore purchases with [microG](https://microg.org/)
+
+Please [see here](https://support.google.com/googleplay/answer/4646404) about how to add, remove, or edit your Google Play payment method.
 
 If you cannot solve the problem with the purchase, you will have to contact Google about it.
 

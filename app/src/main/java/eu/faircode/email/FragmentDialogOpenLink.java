@@ -549,7 +549,7 @@ public class FragmentDialogOpenLink extends FragmentDialogBase {
                                     else
                                         label = res.getString(ri.activityInfo.applicationInfo.labelRes);
                                     if (label == null)
-                                        Log.e("Missing label" +
+                                        Log.w("Missing label" +
                                                 " pkg=" + ri.activityInfo.packageName +
                                                 " res=" + ri.activityInfo.applicationInfo.labelRes);
                                 } catch (Throwable ex) {
@@ -586,6 +586,15 @@ public class FragmentDialogOpenLink extends FragmentDialogBase {
                             Log.e(ex);
                         }
                     }
+
+                    Drawable android = context.getDrawable(R.drawable.twotone_android_24);
+                    android.setBounds(0, 0, dp24, dp24);
+                    pkgs.add(new Package(
+                            android,
+                            context.getString(R.string.title_select_app),
+                            "chooser",
+                            false,
+                            true));
 
                     return pkgs;
                 }

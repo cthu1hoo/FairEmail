@@ -81,6 +81,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentManager;
 import androidx.preference.PreferenceManager;
+import androidx.webkit.WebViewCompat;
 import androidx.webkit.WebViewFeature;
 
 import com.bugsnag.android.BreadcrumbType;
@@ -1843,7 +1844,7 @@ public class Log {
 
         ContentResolver resolver = context.getContentResolver();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        boolean main_log = prefs.getBoolean("main_log", false);
+        boolean main_log = prefs.getBoolean("main_log", true);
         boolean protocol = prefs.getBoolean("protocol", false);
         int level = prefs.getInt("log_level", Log.getDefaultLogLevel());
         long last_cleanup = prefs.getLong("last_cleanup", 0);
@@ -2048,6 +2049,15 @@ public class Log {
 
         sb.append(String.format("Darken support: %b\r\n",
                 WebViewEx.isFeatureSupported(context, WebViewFeature.ALGORITHMIC_DARKENING)));
+        try {
+            PackageInfo pkg = WebViewCompat.getCurrentWebViewPackage(context);
+            sb.append(String.format("WebView %d/%s %s\r\n",
+                    pkg == null ? -1 : pkg.versionCode,
+                    pkg == null ? null : pkg.versionName,
+                    pkg == null || pkg.versionCode / 100000 < 5005 ? "!!!" : ""));
+        } catch (Throwable ex) {
+            sb.append(ex).append("\r\n");
+        }
 
         sb.append("\r\n");
 

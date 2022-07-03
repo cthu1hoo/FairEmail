@@ -1316,7 +1316,7 @@ public class MessageHelper {
 
     String getInReplyTo() throws MessagingException {
         String[] a = getInReplyTos();
-        return (a.length == 0 ? null : TextUtils.join(" ", a));
+        return (a.length < 1 ? null : a[0]);
     }
 
     String[] getInReplyTos() throws MessagingException {
@@ -2880,6 +2880,11 @@ public class MessageHelper {
                 try {
                     byte[] b1 = decodeWord(p1.text, p1.encoding, p1.charset);
                     byte[] b2 = decodeWord(p2.text, p2.encoding, p2.charset);
+                    if (CharsetHelper.isValid(b1, p1.charset) && CharsetHelper.isValid(b2, p2.charset)) {
+                        p++;
+                        continue;
+                    }
+
                     byte[] b = new byte[b1.length + b2.length];
                     System.arraycopy(b1, 0, b, 0, b1.length);
                     System.arraycopy(b2, 0, b, b1.length, b2.length);
@@ -3172,8 +3177,38 @@ public class MessageHelper {
                         result = Helper.readStream((InputStream) content,
                                 cs == null ? StandardCharsets.ISO_8859_1 : cs);
                     } else {
-                        Log.e(content.getClass().getName());
-                        result = content.toString();
+                        result = null;
+
+                        StringBuilder m = new StringBuilder();
+                        if (content instanceof Multipart) {
+                            m.append("multipart");
+                            Multipart mp = (Multipart) content;
+                            for (int i = 0; i < mp.getCount(); i++) {
+                                BodyPart bp = mp.getBodyPart(i);
+                                try {
+                                    ContentType ct = new ContentType(bp.getContentType());
+                                    if (h.contentType.match(ct)) {
+                                        String _charset = ct.getParameter("charset");
+                                        Charset _cs = (TextUtils.isEmpty(_charset)
+                                                ? StandardCharsets.ISO_8859_1 :
+                                                Charset.forName(_charset));
+                                        result = Helper.readStream(bp.getInputStream(), _cs);
+                                    }
+                                } catch (Throwable ex) {
+                                    Log.w(ex);
+                                }
+                                m.append(' ').append(bp.getContentType());
+                            }
+                        } else
+                            m.append(content.getClass().getName());
+
+                        String msg = "Expected " + h.contentType + " got " + m + " result=" + (result != null);
+                        Log.e(msg);
+                        warnings.add(msg);
+
+                        if (result == null)
+                            result = Helper.readStream(h.part.getInputStream(),
+                                    cs == null ? StandardCharsets.ISO_8859_1 : cs);
                     }
                 } catch (DecodingException ex) {
                     Log.e(ex);
@@ -4054,7 +4089,7 @@ public class MessageHelper {
                     Object content = part.getContent();
 
                     if (content instanceof String)
-                        content = parseMultipart((String) content, part.getContentType());
+                        content = tryParseMultipart((String) content, part.getContentType());
 
                     if (content instanceof Multipart) {
                         Multipart mp = (Multipart) content;
@@ -4081,7 +4116,7 @@ public class MessageHelper {
                         Object content = part.getContent();
 
                         if (content instanceof String)
-                            content = parseMultipart((String) content, part.getContentType());
+                            content = tryParseMultipart((String) content, part.getContentType());
 
                         if (content instanceof Multipart) {
                             Multipart multipart = (Multipart) content;
@@ -4131,7 +4166,7 @@ public class MessageHelper {
                         Object content = part.getContent();
 
                         if (content instanceof String)
-                            content = parseMultipart((String) content, part.getContentType());
+                            content = tryParseMultipart((String) content, part.getContentType());
 
                         if (content instanceof Multipart) {
                             Multipart multipart = (Multipart) content;
@@ -4233,7 +4268,7 @@ public class MessageHelper {
                 Object content = part.getContent(); // Should always be Multipart
 
                 if (content instanceof String)
-                    content = parseMultipart((String) content, part.getContentType());
+                    content = tryParseMultipart((String) content, part.getContentType());
 
                 if (content instanceof Multipart) {
                     multipart = (Multipart) part.getContent();
@@ -4391,28 +4426,33 @@ public class MessageHelper {
         }
     }
 
-    private Multipart parseMultipart(String text, String contentType) throws MessagingException {
-        return new MimeMultipart(new DataSource() {
-            @Override
-            public InputStream getInputStream() throws IOException {
-                return new ByteArrayInputStream(text.getBytes(StandardCharsets.ISO_8859_1));
-            }
+    private Object tryParseMultipart(String text, String contentType) {
+        try {
+            return new MimeMultipart(new DataSource() {
+                @Override
+                public InputStream getInputStream() throws IOException {
+                    return new ByteArrayInputStream(text.getBytes(StandardCharsets.ISO_8859_1));
+                }
 
-            @Override
-            public OutputStream getOutputStream() throws IOException {
-                return null;
-            }
+                @Override
+                public OutputStream getOutputStream() throws IOException {
+                    return null;
+                }
 
-            @Override
-            public String getContentType() {
-                return contentType;
-            }
+                @Override
+                public String getContentType() {
+                    return contentType;
+                }
 
-            @Override
-            public String getName() {
-                return "String";
-            }
-        });
+                @Override
+                public String getName() {
+                    return "String";
+                }
+            });
+        } catch (MessagingException ex) {
+            Log.e(ex);
+            return text;
+        }
     }
 
     private void ensureEnvelope() throws MessagingException {

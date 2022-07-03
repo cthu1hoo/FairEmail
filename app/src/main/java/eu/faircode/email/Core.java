@@ -2293,17 +2293,19 @@ class Core {
 
             } else if (folder.tbd != null && folder.tbd) {
                 try {
-                    EntityLog.log(context, folder.name + " deleting");
+                    EntityLog.log(context, folder.name + " deleting server");
                     Folder ifolder = istore.getFolder(folder.name);
                     if (ifolder.exists()) {
                         ifolder.setSubscribed(false);
                         ifolder.delete(false);
                     }
+                    EntityLog.log(context, folder.name + " deleting device");
                     db.folder().deleteFolder(folder.id);
                 } finally {
                     db.folder().resetFolderTbd(folder.id);
                     sync_folders = true;
                 }
+                EntityLog.log(context, folder.name + " deleted");
 
             } else {
                 if (EntityFolder.DRAFTS.equals(folder.type))
@@ -2671,6 +2673,7 @@ class Core {
                     childs == null || childs.size() == 0) {
                 EntityLog.log(context, name + " delete");
                 db.folder().deleteFolder(account.id, name);
+                EntityLog.log(context, name + " deleted");
                 prefs.edit().remove("updated." + account.id + "." + folder.type).apply();
             } else
                 Log.w(name + " keep type=" + folder.type);
@@ -4248,12 +4251,11 @@ class Core {
 
                             List<EntityMessage> all = new ArrayList<>();
 
-                            if (message.inreplyto != null)
-                                for (String inreplyto : message.inreplyto.split(" ")) {
-                                    List<EntityMessage> replied = db.message().getMessagesByMsgId(folder.account, inreplyto);
-                                    if (replied != null)
-                                        all.addAll(replied);
-                                }
+                            if (message.inreplyto != null) {
+                                List<EntityMessage> replied = db.message().getMessagesByMsgId(folder.account, message.inreplyto);
+                                if (replied != null)
+                                    all.addAll(replied);
+                            }
                             if (r.refid != null) {
                                 List<EntityMessage> refs = db.message().getMessagesByMsgId(folder.account, r.refid);
                                 if (refs != null)
@@ -4267,10 +4269,8 @@ class Core {
                                         map.put(f.id, f);
                                 }
 
-                            if (message.inreplyto != null)
-                                for (EntityFolder f : map.values())
-                                    for (String inreplyto : message.inreplyto.split(" "))
-                                        EntityOperation.queue(context, f, EntityOperation.REPORT, inreplyto, label);
+                            for (EntityFolder f : map.values())
+                                EntityOperation.queue(context, f, EntityOperation.REPORT, message.inreplyto, label);
                         }
                     }
                 } catch (Throwable ex) {

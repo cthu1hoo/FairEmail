@@ -162,6 +162,7 @@ public class ActivitySetup extends ActivityBase implements FragmentManager.OnBac
     static final String ACTION_MANAGE_LOCAL_CONTACTS = BuildConfig.APPLICATION_ID + ".MANAGE_LOCAL_CONTACTS";
     static final String ACTION_MANAGE_CERTIFICATES = BuildConfig.APPLICATION_ID + ".MANAGE_CERTIFICATES";
     static final String ACTION_IMPORT_CERTIFICATE = BuildConfig.APPLICATION_ID + ".IMPORT_CERTIFICATE";
+    static final String ACTION_SETUP_REORDER = BuildConfig.APPLICATION_ID + ".SETUP_REORDER";
     static final String ACTION_SETUP_MORE = BuildConfig.APPLICATION_ID + ".SETUP_MORE";
 
     @Override
@@ -414,6 +415,7 @@ public class ActivitySetup extends ActivityBase implements FragmentManager.OnBac
         iff.addAction(ACTION_MANAGE_LOCAL_CONTACTS);
         iff.addAction(ACTION_MANAGE_CERTIFICATES);
         iff.addAction(ACTION_IMPORT_CERTIFICATE);
+        iff.addAction(ACTION_SETUP_REORDER);
         iff.addAction(ACTION_SETUP_MORE);
         lbm.registerReceiver(receiver, iff);
     }
@@ -709,8 +711,39 @@ public class ActivitySetup extends ActivityBase implements FragmentManager.OnBac
                         }
 
                         JSONArray jrules = new JSONArray();
-                        for (EntityRule rule : db.rule().getRules(folder.id))
+                        for (EntityRule rule : db.rule().getRules(folder.id)) {
+                            try {
+                                JSONObject jaction = new JSONObject(rule.action);
+                                int type = jaction.getInt("type");
+                                switch (type) {
+                                    case EntityRule.TYPE_MOVE:
+                                    case EntityRule.TYPE_COPY:
+                                        long target = jaction.getLong("target");
+                                        EntityFolder f = db.folder().getFolder(target);
+                                        EntityAccount a = (f == null ? null : db.account().getAccount(f.account));
+                                        if (a != null)
+                                            jaction.put("targetAccountUuid", a.uuid);
+                                        if (f != null)
+                                            jaction.put("targetFolderName", f.name);
+                                        break;
+                                    case EntityRule.TYPE_ANSWER:
+                                        long identity = jaction.getLong("identity");
+                                        long answer = jaction.getLong("answer");
+                                        EntityIdentity i = db.identity().getIdentity(identity);
+                                        EntityAnswer t = db.answer().getAnswer(answer);
+                                        if (i != null)
+                                            jaction.put("identityUuid", i.uuid);
+                                        if (t != null)
+                                            jaction.put("answerUuid", t.uuid);
+                                        break;
+                                }
+                                rule.action = jaction.toString();
+                            } catch (Throwable ex) {
+                                Log.e(ex);
+                            }
+
                             jrules.put(rule.toJSON());
+                        }
                         jfolder.put("rules", jrules);
 
                         jfolders.put(jfolder);
@@ -984,6 +1017,10 @@ public class ActivitySetup extends ActivityBase implements FragmentManager.OnBac
                             long id = answer.id;
                             answer.id = null;
 
+                            EntityAnswer existing = db.answer().getAnswerByUUID(answer.uuid);
+                            if (existing != null)
+                                db.answer().deleteAnswer(existing.id);
+
                             answer.id = db.answer().insertAnswer(answer);
                             xAnswer.put(id, answer.id);
 
@@ -1165,17 +1202,48 @@ public class ActivitySetup extends ActivityBase implements FragmentManager.OnBac
                                     switch (type) {
                                         case EntityRule.TYPE_MOVE:
                                         case EntityRule.TYPE_COPY:
+                                            String targetAccountUuid = jaction.optString("targetAccountUuid");
+                                            String targetFolderName = jaction.optString("targetFolderName");
+                                            if (!TextUtils.isEmpty(targetAccountUuid) && !TextUtils.isEmpty(targetFolderName)) {
+                                                EntityAccount a = db.account().getAccountByUUID(targetAccountUuid);
+                                                if (a != null) {
+                                                    EntityFolder f = db.folder().getFolderByName(a.id, targetFolderName);
+                                                    if (f != null) {
+                                                        jaction.put("target", f.id);
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
+                                            // Legacy
                                             long target = jaction.getLong("target");
-                                            Log.i("XLAT target " + target + " > " + xFolder.get(target));
-                                            jaction.put("target", xFolder.get(target));
+                                            Long tid = xFolder.get(target);
+                                            Log.i("XLAT target " + target + " > " + tid);
+                                            if (tid != null)
+                                                jaction.put("target", tid);
                                             break;
                                         case EntityRule.TYPE_ANSWER:
+                                            String identityUuid = jaction.optString("identityUuid");
+                                            String answerUuid = jaction.optString("answerUuid");
+                                            if (!TextUtils.isEmpty(identityUuid) && !TextUtils.isEmpty(answerUuid)) {
+                                                EntityIdentity i = db.identity().getIdentityByUUID(identityUuid);
+                                                EntityAnswer a = db.answer().getAnswerByUUID(answerUuid);
+                                                if (i != null && a != null) {
+                                                    jaction.put("identity", i.id);
+                                                    jaction.put("answer", a.id);
+                                                    break;
+                                                }
+                                            }
+
+                                            // Legacy
                                             long identity = jaction.getLong("identity");
                                             long answer = jaction.getLong("answer");
-                                            Log.i("XLAT identity " + identity + " > " + xIdentity.get(identity));
-                                            Log.i("XLAT answer " + answer + " > " + xAnswer.get(answer));
-                                            jaction.put("identity", xIdentity.get(identity));
-                                            jaction.put("answer", xAnswer.get(answer));
+                                            Long iid = xIdentity.get(identity);
+                                            Long aid = xAnswer.get(answer);
+                                            Log.i("XLAT identity " + identity + " > " + iid);
+                                            Log.i("XLAT answer " + answer + " > " + aid);
+                                            jaction.put("identity", iid);
+                                            jaction.put("answer", aid);
                                             break;
                                     }
 
@@ -1934,6 +2002,8 @@ public class ActivitySetup extends ActivityBase implements FragmentManager.OnBac
                     onManageCertificates(intent);
                 else if (ACTION_IMPORT_CERTIFICATE.equals(action))
                     onImportCertificate(intent);
+                else if (ACTION_SETUP_REORDER.equals(action))
+                    onMenuOrder(R.string.title_setup_reorder_accounts, EntityAccount.class);
                 else if (ACTION_SETUP_MORE.equals(action))
                     onSetupMore(intent);
             }

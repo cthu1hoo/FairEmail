@@ -56,6 +56,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.regex.Pattern;
 
@@ -82,6 +83,8 @@ public class EntityRule {
 
     @PrimaryKey(autoGenerate = true)
     public Long id;
+    @NonNull
+    public String uuid = UUID.randomUUID().toString();
     @NonNull
     public Long folder;
     @NonNull
@@ -344,10 +347,7 @@ public class EntityRule {
             }
 
             // Body
-            JSONObject jbody = null;
-            if (message.encrypt == null ||
-                    EntityMessage.ENCRYPT_NONE.equals(message.encrypt))
-                jbody = jcondition.optJSONObject("body");
+            JSONObject jbody = jcondition.optJSONObject("body");
             if (jbody != null) {
                 String value = jbody.getString("value");
                 boolean regex = jbody.getBoolean("regex");
@@ -366,7 +366,10 @@ public class EntityRule {
                 }
 
                 if (html == null)
-                    throw new IllegalArgumentException(context.getString(R.string.title_rule_no_body));
+                    if (message.encrypt == null || EntityMessage.ENCRYPT_NONE.equals(message.encrypt))
+                        throw new IllegalArgumentException(context.getString(R.string.title_rule_no_body));
+                    else
+                        return false;
 
                 Document d = JsoupEx.parse(html);
                 if (skip_quotes)
@@ -1161,7 +1164,8 @@ public class EntityRule {
     public boolean equals(Object obj) {
         if (obj instanceof EntityRule) {
             EntityRule other = (EntityRule) obj;
-            return this.folder.equals(other.folder) &&
+            return Objects.equals(this.uuid, other.uuid) &&
+                    this.folder.equals(other.folder) &&
                     this.name.equals(other.name) &&
                     this.order == other.order &&
                     this.enabled == other.enabled &&
@@ -1212,6 +1216,7 @@ public class EntityRule {
     public JSONObject toJSON() throws JSONException {
         JSONObject json = new JSONObject();
         json.put("id", id);
+        json.put("uuid", uuid);
         json.put("name", name);
         json.put("order", order);
         json.put("enabled", enabled);
@@ -1226,6 +1231,8 @@ public class EntityRule {
     public static EntityRule fromJSON(JSONObject json) throws JSONException {
         EntityRule rule = new EntityRule();
         // id
+        if (json.has("uuid"))
+            rule.uuid = json.getString("uuid");
         rule.name = json.getString("name");
         rule.order = json.getInt("order");
         rule.enabled = json.getBoolean("enabled");
