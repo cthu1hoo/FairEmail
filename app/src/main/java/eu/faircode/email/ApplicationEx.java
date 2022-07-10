@@ -634,7 +634,10 @@ public class ApplicationEx extends Application
         } else if (version < 1927) {
             if (!prefs.contains("auto_identity"))
                 editor.putBoolean("auto_identity", true);
-        }
+        } else if (version < 1931)
+            editor.remove("button_force_light").remove("fake_dark");
+        else if (version < 1933)
+            editor.putBoolean("lt_enabled", true);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !BuildConfig.DEBUG)
             editor.remove("background_service");

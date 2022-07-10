@@ -915,8 +915,17 @@ public class FragmentCompose extends FragmentBase {
         ibReferenceImages.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ibReferenceImages.setVisibility(View.GONE);
-                onReferenceImages();
+                new AlertDialog.Builder(v.getContext())
+                        .setMessage(R.string.title_ask_show_image)
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ibReferenceImages.setVisibility(View.GONE);
+                                onReferenceImages();
+                            }
+                        })
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show();
             }
         });
 
@@ -1871,9 +1880,12 @@ public class FragmentCompose extends FragmentBase {
 
         bottom_navigation.findViewById(R.id.action_save).setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public boolean onLongClick(View view) {
-                onLanguageTool();
-                return true;
+            public boolean onLongClick(View v) {
+                if (LanguageTool.isEnabled(v.getContext())) {
+                    onLanguageTool();
+                    return true;
+                } else
+                    return false;
             }
         });
 

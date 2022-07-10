@@ -37,6 +37,7 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.fonts.Font;
 import android.graphics.fonts.SystemFonts;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
@@ -111,6 +112,9 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
     private TextView tvFtsIndexed;
     private TextView tvFtsPro;
     private Spinner spLanguage;
+    private SwitchCompat swLanguageTool;
+    private TextView tvLanguageToolPrivacy;
+    private ImageButton ibLanguageTool;
     private SwitchCompat swDeepL;
     private ImageButton ibDeepL;
     private TextView tvSdcard;
@@ -151,6 +155,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
     private SwitchCompat swWal;
     private SwitchCompat swCheckpoints;
     private SwitchCompat swAnalyze;
+    private SwitchCompat swAutoVacuum;
     private TextView tvSqliteCache;
     private SeekBar sbSqliteCache;
     private TextView tvChunkSize;
@@ -161,6 +166,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
     private SwitchCompat swUndoManager;
     private SwitchCompat swWebViewLegacy;
     private SwitchCompat swBrowserZoom;
+    private SwitchCompat swFakeDark;
     private SwitchCompat swShowRecent;
     private SwitchCompat swModSeq;
     private SwitchCompat swUid;
@@ -171,6 +177,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
     private SwitchCompat swAuthNtlm;
     private SwitchCompat swAuthSasl;
     private SwitchCompat swAuthApop;
+    private SwitchCompat swDisableTop;
     private SwitchCompat swKeepAlivePoll;
     private SwitchCompat swEmptyPool;
     private SwitchCompat swIdleDone;
@@ -209,16 +216,18 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
     private final static String[] RESET_OPTIONS = new String[]{
             "sort_answers", "shortcuts", "fts",
             "classification", "class_min_probability", "class_min_difference",
-            "language", "deepl_enabled",
+            "language", "lt_enabled", "deepl_enabled",
             "updates", "weekly", "show_changelog",
             "crash_reports", "cleanup_attachments",
             "watchdog", "experiments", "main_log", "protocol", "log_level", "debug", "leak_canary", "test1",
             "test2", "test3", "test4", "test5",
             "work_manager", // "external_storage",
-            "query_threads", "wal", "sqlite_checkpoints", "sqlite_analyze", "sqlite_cache",
-            "chunk_size", "thread_range", "undo_manager", "webview_legacy", "browser_zoom", "show_recent",
+            "query_threads", "wal", "sqlite_checkpoints", "sqlite_analyze", "sqlite_auto_vacuum", "sqlite_cache",
+            "chunk_size", "thread_range", "undo_manager",
+            "webview_legacy", "browser_zoom", "fake_dark",
+            "show_recent",
             "use_modseq", "uid_command", "perform_expunge", "uid_expunge",
-            "auth_plain", "auth_login", "auth_ntlm", "auth_sasl", "auth_apop",
+            "auth_plain", "auth_login", "auth_ntlm", "auth_sasl", "auth_apop", "disable_top",
             "keep_alive_poll", "empty_pool", "idle_done", "logarithmic_backoff",
             "exact_alarms", "infra", "dkim_verify", "dup_msgids", "test_iab"
     };
@@ -242,7 +251,8 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
             "gmail_checked",
             "eml_auto_confirm",
             "open_with_pkg", "open_with_tabs",
-            "gmail_checked", "outlook_checked"
+            "gmail_checked", "outlook_checked",
+            "redmi_note"
     };
 
     @Override
@@ -287,6 +297,9 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
         tvFtsIndexed = view.findViewById(R.id.tvFtsIndexed);
         tvFtsPro = view.findViewById(R.id.tvFtsPro);
         spLanguage = view.findViewById(R.id.spLanguage);
+        swLanguageTool = view.findViewById(R.id.swLanguageTool);
+        tvLanguageToolPrivacy = view.findViewById(R.id.tvLanguageToolPrivacy);
+        ibLanguageTool = view.findViewById(R.id.ibLanguageTool);
         swDeepL = view.findViewById(R.id.swDeepL);
         ibDeepL = view.findViewById(R.id.ibDeepL);
         tvSdcard = view.findViewById(R.id.tvSdcard);
@@ -327,6 +340,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
         swWal = view.findViewById(R.id.swWal);
         swCheckpoints = view.findViewById(R.id.swCheckpoints);
         swAnalyze = view.findViewById(R.id.swAnalyze);
+        swAutoVacuum = view.findViewById(R.id.swAutoVacuum);
         tvSqliteCache = view.findViewById(R.id.tvSqliteCache);
         sbSqliteCache = view.findViewById(R.id.sbSqliteCache);
         ibSqliteCache = view.findViewById(R.id.ibSqliteCache);
@@ -337,6 +351,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
         swUndoManager = view.findViewById(R.id.swUndoManager);
         swWebViewLegacy = view.findViewById(R.id.swWebViewLegacy);
         swBrowserZoom = view.findViewById(R.id.swBrowserZoom);
+        swFakeDark = view.findViewById(R.id.swFakeDark);
         swShowRecent = view.findViewById(R.id.swShowRecent);
         swModSeq = view.findViewById(R.id.swModSeq);
         swUid = view.findViewById(R.id.swUid);
@@ -347,6 +362,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
         swAuthNtlm = view.findViewById(R.id.swAuthNtlm);
         swAuthSasl = view.findViewById(R.id.swAuthSasl);
         swAuthApop = view.findViewById(R.id.swAuthApop);
+        swDisableTop = view.findViewById(R.id.swDisableTop);
         swKeepAlivePoll = view.findViewById(R.id.swKeepAlivePoll);
         swEmptyPool = view.findViewById(R.id.swEmptyPool);
         swIdleDone = view.findViewById(R.id.swIdleDone);
@@ -567,6 +583,28 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
                 prefs.edit().remove("language").commit();
+            }
+        });
+
+        swLanguageTool.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
+                prefs.edit().putBoolean("lt_enabled", checked).apply();
+            }
+        });
+
+        tvLanguageToolPrivacy.getPaint().setUnderlineText(true);
+        tvLanguageToolPrivacy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Helper.view(v.getContext(), Uri.parse(Helper.LT_PRIVACY_URI), true);
+            }
+        });
+
+        ibLanguageTool.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Helper.viewFAQ(v.getContext(), 180);
             }
         });
 
@@ -963,6 +1001,17 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
             }
         });
 
+        swAutoVacuum.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton v, boolean checked) {
+                prefs.edit()
+                        .putBoolean("sqlite_auto_vacuum", checked)
+                        .remove("debug")
+                        .apply();
+                ApplicationEx.restart(v.getContext());
+            }
+        });
+
         sbSqliteCache.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -1049,6 +1098,13 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
             }
         });
 
+        swFakeDark.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
+                prefs.edit().putBoolean("fake_dark", checked).apply();
+            }
+        });
+
         swShowRecent.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
@@ -1121,6 +1177,13 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
                 prefs.edit().putBoolean("auth_apop", checked).apply();
+            }
+        });
+
+        swDisableTop.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
+                prefs.edit().putBoolean("disable_top", checked).apply();
             }
         });
 
@@ -1716,6 +1779,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
         if (selected >= 0)
             spLanguage.setSelection(selected);
 
+        swLanguageTool.setChecked(prefs.getBoolean("lt_enabled", false));
         swDeepL.setChecked(prefs.getBoolean("deepl_enabled", false));
         swUpdates.setChecked(prefs.getBoolean("updates", true));
         swCheckWeekly.setChecked(prefs.getBoolean("weekly", Helper.hasPlayStore(getContext())));
@@ -1749,6 +1813,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
         swWal.setChecked(prefs.getBoolean("wal", true));
         swCheckpoints.setChecked(prefs.getBoolean("sqlite_checkpoints", true));
         swAnalyze.setChecked(prefs.getBoolean("sqlite_analyze", true));
+        swAutoVacuum.setChecked(prefs.getBoolean("sqlite_auto_vacuum", !Helper.isRedmiNote()));
 
         int sqlite_cache = prefs.getInt("sqlite_cache", DB.DEFAULT_CACHE_SIZE);
         Integer cache_size = DB.getCacheSizeKb(getContext());
@@ -1771,6 +1836,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
         swUndoManager.setChecked(prefs.getBoolean("undo_manager", false));
         swWebViewLegacy.setChecked(prefs.getBoolean("webview_legacy", false));
         swBrowserZoom.setChecked(prefs.getBoolean("browser_zoom", false));
+        swFakeDark.setChecked(prefs.getBoolean("fake_dark", false));
         swShowRecent.setChecked(prefs.getBoolean("show_recent", false));
         swModSeq.setChecked(prefs.getBoolean("use_modseq", true));
         swUid.setChecked(prefs.getBoolean("uid_command", false));
@@ -1781,6 +1847,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
         swAuthNtlm.setChecked(prefs.getBoolean("auth_ntlm", true));
         swAuthSasl.setChecked(prefs.getBoolean("auth_sasl", true));
         swAuthApop.setChecked(prefs.getBoolean("auth_apop", false));
+        swDisableTop.setChecked(prefs.getBoolean("disable_top", false));
         swKeepAlivePoll.setChecked(prefs.getBoolean("keep_alive_poll", false));
         swEmptyPool.setChecked(prefs.getBoolean("empty_pool", true));
         swIdleDone.setChecked(prefs.getBoolean("idle_done", true));
