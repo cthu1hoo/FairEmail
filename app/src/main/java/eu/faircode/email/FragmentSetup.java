@@ -121,6 +121,7 @@ public class FragmentSetup extends FragmentBase {
     private CardView cardExtra;
     private TextView tvExtra;
     private Button btnNotification;
+    private Button btnSignature;
     private Button btnReorderAccounts;
     private Button btnReorderFolders;
     private Button btnDelete;
@@ -202,6 +203,7 @@ public class FragmentSetup extends FragmentBase {
         cardExtra = view.findViewById(R.id.cardExtra);
         tvExtra = view.findViewById(R.id.tvExtra);
         btnNotification = view.findViewById(R.id.btnNotification);
+        btnSignature = view.findViewById(R.id.btnSignature);
         btnReorderAccounts = view.findViewById(R.id.btnReorderAccounts);
         btnReorderFolders = view.findViewById(R.id.btnReorderFolders);
         btnDelete = view.findViewById(R.id.btnDelete);
@@ -277,19 +279,32 @@ public class FragmentSetup extends FragmentBase {
                 Resources res = context.getResources();
                 String pkg = context.getPackageName();
 
+                boolean web = false;
+                List<EmailProvider> providers = EmailProvider.loadProfiles(context);
+                for (EmailProvider provider : providers)
+                    if ("gmail".equals(provider.id) &&
+                            provider.oauth != null &&
+                            provider.oauth.enabled) {
+                        web = true;
+                        break;
+                    }
+
                 int order = 1;
-                String gmail = getString(R.string.title_setup_oauth, getString(R.string.title_setup_gmail));
+
+                String gmail = getString(web ? R.string.title_setup_android : R.string.title_setup_oauth,
+                        getString(R.string.title_setup_gmail));
                 MenuItem item = menu.add(Menu.FIRST, R.string.title_setup_gmail, order++, gmail);
                 int resid = res.getIdentifier("provider_gmail", "drawable", pkg);
                 if (resid != 0)
                     item.setIcon(resid);
 
-                for (EmailProvider provider : EmailProvider.loadProfiles(context))
+                for (EmailProvider provider : providers)
                     if (provider.oauth != null &&
                             (provider.oauth.enabled || BuildConfig.DEBUG) &&
                             !TextUtils.isEmpty(provider.oauth.clientId)) {
+                        String title = getString(R.string.title_setup_oauth, provider.description);
                         item = menu
-                                .add(Menu.FIRST, -1, order++, getString(R.string.title_setup_oauth, provider.description))
+                                .add(Menu.FIRST, -1, order++, title)
                                 .setIntent(new Intent(ActivitySetup.ACTION_QUICK_OAUTH)
                                         .putExtra("id", provider.id)
                                         .putExtra("name", provider.description)
@@ -297,6 +312,7 @@ public class FragmentSetup extends FragmentBase {
                                         .putExtra("askAccount", provider.oauth.askAccount)
                                         .putExtra("askTenant", provider.oauth.askTenant())
                                         .putExtra("pop", provider.pop != null));
+                        // https://developers.google.com/identity/branding-guidelines
                         resid = res.getIdentifier("provider_" + provider.id, "drawable", pkg);
                         if (resid != 0)
                             item.setIcon(resid);
@@ -637,6 +653,16 @@ public class FragmentSetup extends FragmentBase {
                 ibExtra.setPressed(true);
                 ibExtra.setPressed(false);
                 ibExtra.performClick();
+            }
+        });
+
+        btnSignature.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentDialogSelectIdentity fragment = new FragmentDialogSelectIdentity();
+                fragment.setArguments(new Bundle());
+                fragment.setTargetFragment(FragmentSetup.this, ActivitySetup.REQUEST_SELECT_IDENTITY);
+                fragment.show(getParentFragmentManager(), "select:identity");
             }
         });
 
@@ -991,6 +1017,14 @@ public class FragmentSetup extends FragmentBase {
 
         try {
             switch (requestCode) {
+                case ActivitySetup.REQUEST_SELECT_IDENTITY:
+                    if (resultCode == RESULT_OK && data != null)
+                        onSelectIdentity(data.getBundleExtra("args"));
+                    break;
+                case ActivitySetup.REQUEST_EDIT_SIGNATURE:
+                    if (resultCode == RESULT_OK && data != null)
+                        onEditIdentity(data.getExtras());
+                    break;
                 case ActivitySetup.REQUEST_DELETE_ACCOUNT:
                     if (resultCode == RESULT_OK && data != null)
                         onDeleteAccount(data.getBundleExtra("args"));
@@ -1049,6 +1083,33 @@ public class FragmentSetup extends FragmentBase {
         tvPermissionsDone.setTypeface(null, all ? Typeface.NORMAL : Typeface.BOLD);
         tvPermissionsDone.setCompoundDrawablesWithIntrinsicBounds(all ? check : null, null, null, null);
         btnPermissions.setEnabled(!all);
+    }
+
+    private void onSelectIdentity(Bundle args) {
+        Intent intent = new Intent(getContext(), ActivitySignature.class);
+        intent.putExtra("id", args.getLong("id"));
+        intent.putExtra("html", args.getString("html"));
+        startActivityForResult(intent, ActivitySetup.REQUEST_EDIT_SIGNATURE);
+    }
+
+    private void onEditIdentity(Bundle args) {
+        new SimpleTask<Void>() {
+            @Override
+            protected Void onExecute(Context context, Bundle args) throws Throwable {
+                long id = args.getLong("id");
+                String html = args.getString("html");
+
+                DB db = DB.getInstance(context);
+                db.identity().setIdentitySignature(id, html);
+
+                return null;
+            }
+
+            @Override
+            protected void onException(Bundle args, Throwable ex) {
+                Log.unexpectedError(getParentFragmentManager(), ex);
+            }
+        }.execute(this, args, "set:signature");
     }
 
     private void onDeleteAccount(Bundle args) {

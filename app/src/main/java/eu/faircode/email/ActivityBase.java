@@ -791,6 +791,7 @@ abstract class ActivityBase extends AppCompatActivity implements SharedPreferenc
 
     public void performBack() {
         if (getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED)) {
+            // https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/app/Activity.java#3896
             ActionBar ab = getSupportActionBar();
             if (ab != null && ab.collapseActionView())
                 return;
@@ -800,7 +801,6 @@ abstract class ActivityBase extends AppCompatActivity implements SharedPreferenc
         }
         finish();
     }
-
 
     public void onBackPressedFragment() {
         performBack();

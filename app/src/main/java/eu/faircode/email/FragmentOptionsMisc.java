@@ -96,6 +96,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
     private boolean resumed = false;
     private List<Pair<String, String>> languages = new ArrayList<>();
 
+    private View view;
     private ImageButton ibHelp;
     private SwitchCompat swPowerMenu;
     private SwitchCompat swExternalSearch;
@@ -177,7 +178,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
     private SwitchCompat swAuthNtlm;
     private SwitchCompat swAuthSasl;
     private SwitchCompat swAuthApop;
-    private SwitchCompat swDisableTop;
+    private SwitchCompat swUseTop;
     private SwitchCompat swKeepAlivePoll;
     private SwitchCompat swEmptyPool;
     private SwitchCompat swIdleDone;
@@ -227,7 +228,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
             "webview_legacy", "browser_zoom", "fake_dark",
             "show_recent",
             "use_modseq", "uid_command", "perform_expunge", "uid_expunge",
-            "auth_plain", "auth_login", "auth_ntlm", "auth_sasl", "auth_apop", "disable_top",
+            "auth_plain", "auth_login", "auth_ntlm", "auth_sasl", "auth_apop", "use_top",
             "keep_alive_poll", "empty_pool", "idle_done", "logarithmic_backoff",
             "exact_alarms", "infra", "dkim_verify", "dup_msgids", "test_iab"
     };
@@ -277,7 +278,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
         setSubtitle(R.string.title_setup);
         setHasOptionsMenu(true);
 
-        View view = inflater.inflate(R.layout.fragment_options_misc, container, false);
+        view = inflater.inflate(R.layout.fragment_options_misc, container, false);
 
         // Get controls
 
@@ -362,7 +363,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
         swAuthNtlm = view.findViewById(R.id.swAuthNtlm);
         swAuthSasl = view.findViewById(R.id.swAuthSasl);
         swAuthApop = view.findViewById(R.id.swAuthApop);
-        swDisableTop = view.findViewById(R.id.swDisableTop);
+        swUseTop = view.findViewById(R.id.swUseTop);
         swKeepAlivePoll = view.findViewById(R.id.swKeepAlivePoll);
         swEmptyPool = view.findViewById(R.id.swEmptyPool);
         swIdleDone = view.findViewById(R.id.swIdleDone);
@@ -1180,10 +1181,10 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
             }
         });
 
-        swDisableTop.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        swUseTop.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
-                prefs.edit().putBoolean("disable_top", checked).apply();
+                prefs.edit().putBoolean("use_top", checked).apply();
             }
         });
 
@@ -1731,9 +1732,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
     }
 
     private void setOptions() {
-        if (getContext() == null)
-            return;
-        if (getLifecycle().getCurrentState().equals(Lifecycle.State.DESTROYED))
+        if (view == null || getContext() == null)
             return;
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
@@ -1847,7 +1846,7 @@ public class FragmentOptionsMisc extends FragmentBase implements SharedPreferenc
         swAuthNtlm.setChecked(prefs.getBoolean("auth_ntlm", true));
         swAuthSasl.setChecked(prefs.getBoolean("auth_sasl", true));
         swAuthApop.setChecked(prefs.getBoolean("auth_apop", false));
-        swDisableTop.setChecked(prefs.getBoolean("disable_top", false));
+        swUseTop.setChecked(prefs.getBoolean("use_top", true));
         swKeepAlivePoll.setChecked(prefs.getBoolean("keep_alive_poll", false));
         swEmptyPool.setChecked(prefs.getBoolean("empty_pool", true));
         swIdleDone.setChecked(prefs.getBoolean("idle_done", true));

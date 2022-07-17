@@ -164,7 +164,6 @@
     <string name="title_setup_gmail_support">Auktorisera Google-konton kommer endast att fungera i Play Store- och GitHub-versionen eftersom Android kontrollerar den digitala app-signaturen</string>
     <string name="title_setup_gmail_rationale">Vänligen bevilja behörigheter för att välja ett konto och läsa ditt namn</string>
     <string name="title_setup_gmail_permissions">Google kommer att be om behörighet att läsa, komponera, skicka och permanent ta bort all din e-post. FairEmail kommer aldrig att ta bort dina meddelanden utan ditt uttryckliga medgivande.</string>
-    <string name="title_setup_gmail_drafts">Om mappen för utkast inte är åtkomlig för IMAP kan detta lösas under inställningarna för Gmail-etiketten</string>
     <string name="title_setup_gmail_password">Jag vill auktorisera ett konto med ett lösenord istället för ett konto på enheten</string>
     <string name="title_setup_office_auth">Felet \"AUTHENTICATE failed\" kan orsakas av att IMAP/SMTP inaktiveras av systemadministratören</string>
     <string name="title_setup_oauth_rationale">Auktorisera åtkomst till ditt %1$s konto</string>
@@ -472,7 +471,7 @@
     <string name="title_advanced_text_size">Använd textstorlekar</string>
     <string name="title_advanced_text_font">Använd typsnitt</string>
     <string name="title_advanced_text_align">Använd textjustering</string>
-    <string name="title_advanced_text_titles" comment="title_advanced_text_titles&#10;&#10;Title for advanced display option to show HTML titles.&#10;The curly braces indicate that inserted titles will be surrounded by curly braces.&#10;https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/title&#10;">Visa {HTML titles}</string>
+    <string name="title_advanced_text_titles">Visa {HTML titles}</string>
     <string name="title_advanced_text_separators">Använd separata linjer</string>
     <string name="title_advanced_collapse_quotes">Kollapsa citerad text</string>
     <string name="title_advanced_image_placeholders">Visa bildplatshållare</string>
@@ -783,7 +782,6 @@
     <string name="title_custom">Anpassad</string>
     <string name="title_host">Värdnamn</string>
     <string name="title_encryption">Kryptering</string>
-    <string name="title_encryption_none">Ingen</string>
     <string name="title_allow_insecure">Tillåt osäkra anslutningar</string>
     <string name="title_insecure_remark">Osäkra anslutningar bör endast tillåtas på betrodda nätverk och aldrig på offentliga nätverk</string>
     <string name="title_notify_remark">Du kan aktivera det här för kontospecifika aviseringar</string>
@@ -1766,6 +1764,7 @@
     <string-array name="pollIntervalNames">
         <item>Kontinuerligt</item>
         <item>Var 5:e minut</item>
+        <item>Var 10:e minut</item>
         <item>Var 15:e minut</item>
         <item>Var 30:e minut</item>
         <item>Varje timme</item>
@@ -1809,6 +1808,7 @@
         <item>Gå till nästa konversation</item>
     </string-array>
     <string-array name="resizeNames">
+        <item>Mycket liten</item>
         <item>Extra liten</item>
         <item>Liten</item>
         <item>Mellan</item>

@@ -187,7 +187,7 @@ public class Helper {
 
     static final String PACKAGE_CHROME = "com.android.chrome";
     static final String PACKAGE_WEBVIEW = "https://play.google.com/store/apps/details?id=com.google.android.webview";
-    static final String PRIVACY_URI = "https://email.faircode.eu/privacy/";
+    static final String PRIVACY_URI = "https://email.faircode.eu/PRIVACY.md";
     static final String TUTORIALS_URI = "https://github.com/M66B/FairEmail/tree/master/tutorials";
     static final String XDA_URI = "https://forum.xda-developers.com/showthread.php?t=3824168";
     static final String SUPPORT_URI = "https://contact.faircode.eu/";
@@ -915,33 +915,44 @@ public class Helper {
             open_with_tabs = false;
         }
 
-        if (open_with_pkg != null && !isInstalled(context, open_with_pkg)) {
-            open_with_pkg = null;
-            open_with_tabs = false;
+        if (!"chooser".equals(open_with_pkg)) {
+            if (open_with_pkg != null && !isInstalled(context, open_with_pkg)) {
+                open_with_pkg = null;
+                open_with_tabs = false;
+            }
+
+            if (open_with_tabs && !hasCustomTabs(context, uri, open_with_pkg))
+                open_with_tabs = false;
         }
 
-        if (open_with_tabs && !hasCustomTabs(context, uri, open_with_pkg))
-            open_with_tabs = false;
+        Intent view = new Intent(Intent.ACTION_VIEW);
+        if (mimeType == null)
+            view.setData(uri);
+        else
+            view.setDataAndType(uri, mimeType);
+        if (task)
+            view.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         if ("chooser".equals(open_with_pkg)) {
-            Intent view = new Intent(Intent.ACTION_VIEW, uri);
-            Intent chooser = Intent.createChooser(view, context.getString(R.string.title_select_app));
             try {
-                EntityLog.log(context, "Launching chooser uri=" + uri);
-                context.startActivity(chooser);
+                if (open_with_tabs) {
+                    EntityLog.log(context, "Launching direct uri=" + uri +
+                            " intent=" + view +
+                            " extras=" + TextUtils.join(", ", Log.getExtras(view.getExtras())));
+                    context.startActivity(view);
+                } else {
+                    EntityLog.log(context, "Launching chooser uri=" + uri +
+                            " intent=" + view +
+                            " extras=" + TextUtils.join(", ", Log.getExtras(view.getExtras())));
+                    Intent chooser = Intent.createChooser(view, context.getString(R.string.title_select_app));
+                    context.startActivity(chooser);
+                }
             } catch (ActivityNotFoundException ex) {
                 Log.w(ex);
                 reportNoViewer(context, uri, ex);
             }
         } else if (browse || !open_with_tabs) {
             try {
-                Intent view = new Intent(Intent.ACTION_VIEW);
-                if (mimeType == null)
-                    view.setData(uri);
-                else
-                    view.setDataAndType(uri, mimeType);
-                if (task)
-                    view.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 view.setPackage(open_with_pkg);
                 EntityLog.log(context, "Launching view uri=" + uri +
                         " intent=" + view +
