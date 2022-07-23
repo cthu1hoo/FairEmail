@@ -419,7 +419,6 @@
     <string name="title_advanced_two_col">Використовувати два стовпчики</string>
     <string name="title_advanced_min_screen_size">Мінімальний розмір екрану для його розділення</string>
     <string name="title_advanced_close_pane">Згорнути рядок або стовпець при закритті розмови</string>
-    <string name="title_advanced_column_width">Ширина стовпця повідомлення: %1$s %%</string>
     <string name="title_advanced_nav_options">Показати параметри меню навігації</string>
     <string name="title_advanced_nav_categories">Показувати категорії облікових записів у навігаційному меню</string>
     <string name="title_advanced_nav_pin">Прикріпити меню навігації</string>
@@ -1353,6 +1352,10 @@
     <string name="title_search_in">Пошук у</string>
     <string name="title_search_sender">Пошук відправника</string>
     <string name="title_search_delete">Видалити збережений пошук?</string>
+    <string name="title_save_search">Збережений пошуковий запит</string>
+    <string name="title_save_search_name">Ім\'я</string>
+    <string name="title_save_search_order">Порядок</string>
+    <string name="title_save_search_color">Колір</string>
     <string name="title_sort_on">Сортувати за</string>
     <string name="title_sort_on_time">Часом</string>
     <string name="title_sort_on_unread">Непрочитані</string>
@@ -1715,7 +1718,6 @@
     <string name="title_boundary_retry">Спробуйте знову</string>
     <string name="title_unexpected_error">Непередбачувана помилка</string>
     <string name="title_log">Журнал подій</string>
-    <string name="title_auto_scroll">Автоматичне прокручування</string>
     <string name="title_log_clear">Очистити</string>
     <string name="title_rules_search_hint">Пошук імені або стану</string>
     <string name="title_rules_export">Експорт правил</string>

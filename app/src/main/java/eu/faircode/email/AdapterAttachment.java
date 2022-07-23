@@ -20,6 +20,7 @@ package eu.faircode.email;
 */
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -36,6 +37,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
@@ -64,6 +66,7 @@ public class AdapterAttachment extends RecyclerView.Adapter<AdapterAttachment.Vi
     private LayoutInflater inflater;
 
     private boolean readonly;
+    private boolean vt_enabled;
     private boolean debug;
     private int dp12;
     private int dp36;
@@ -79,6 +82,7 @@ public class AdapterAttachment extends RecyclerView.Adapter<AdapterAttachment.Vi
         private TextView tvSize;
         private ImageView ivStatus;
         private ImageButton ibSave;
+        private ImageButton ibScan;
         private TextView tvType;
         private TextView tvError;
         private ProgressBar progressbar;
@@ -93,6 +97,7 @@ public class AdapterAttachment extends RecyclerView.Adapter<AdapterAttachment.Vi
             tvSize = itemView.findViewById(R.id.tvSize);
             ivStatus = itemView.findViewById(R.id.ivStatus);
             ibSave = itemView.findViewById(R.id.ibSave);
+            ibScan = itemView.findViewById(R.id.ibScan);
             tvType = itemView.findViewById(R.id.tvType);
             ivDisposition = itemView.findViewById(R.id.ivDisposition);
             tvError = itemView.findViewById(R.id.tvError);
@@ -103,6 +108,8 @@ public class AdapterAttachment extends RecyclerView.Adapter<AdapterAttachment.Vi
             view.setOnClickListener(this);
             ibDelete.setOnClickListener(this);
             ibSave.setOnClickListener(this);
+            if (vt_enabled)
+                ibScan.setOnClickListener(this);
             view.setOnLongClickListener(this);
         }
 
@@ -110,6 +117,8 @@ public class AdapterAttachment extends RecyclerView.Adapter<AdapterAttachment.Vi
             view.setOnClickListener(null);
             ibDelete.setOnClickListener(null);
             ibSave.setOnClickListener(null);
+            if (vt_enabled)
+                ibScan.setOnClickListener(null);
             view.setOnLongClickListener(null);
         }
 
@@ -168,6 +177,7 @@ public class AdapterAttachment extends RecyclerView.Adapter<AdapterAttachment.Vi
             }
 
             ibSave.setVisibility(attachment.available ? View.VISIBLE : View.GONE);
+            ibScan.setVisibility(attachment.available && vt_enabled ? View.VISIBLE : View.GONE);
 
             if (attachment.progress != null)
                 progressbar.setProgress(attachment.progress);
@@ -201,10 +211,13 @@ public class AdapterAttachment extends RecyclerView.Adapter<AdapterAttachment.Vi
             if (attachment == null)
                 return;
 
-            if (view.getId() == R.id.ibDelete)
+            int id = view.getId();
+            if (id == R.id.ibDelete)
                 onDelete(attachment);
-            else if (view.getId() == R.id.ibSave)
+            else if (id == R.id.ibSave)
                 onSave(attachment);
+            else if (id == R.id.ibScan)
+                onScan(attachment);
             else {
                 if (attachment.available)
                     onShare(attachment);
@@ -299,6 +312,67 @@ public class AdapterAttachment extends RecyclerView.Adapter<AdapterAttachment.Vi
                             .putExtra("type", attachment.getMimeType()));
         }
 
+        private void onScan(EntityAttachment attachment) {
+            Bundle args = new Bundle();
+            args.putLong("id", attachment.id);
+
+            new SimpleTask<Bundle>() {
+                @Override
+                protected Bundle onExecute(Context context, Bundle args) throws Throwable {
+                    long id = args.getLong("id");
+
+                    DB db = DB.getInstance(context);
+                    EntityAttachment attachment = db.attachment().getAttachment(id);
+                    if (attachment == null)
+                        return null;
+
+                    return VirusTotal.scan(context, attachment.getFile(context));
+                }
+
+                @Override
+                protected void onExecuted(Bundle args, Bundle result) {
+                    String uri = result.getString("uri");
+                    int count = result.getInt("count", -1);
+                    int malicious = result.getInt("malicious", -1);
+                    String label = result.getString("label");
+
+                    if (count < 0) {
+                        Helper.view(context, Uri.parse(uri), true);
+                        return;
+                    }
+
+                    View view = LayoutInflater.from(context).inflate(R.layout.dialog_virus_total, null);
+                    final TextView tvName = view.findViewById(R.id.tvName);
+                    final ProgressBar pbAnalysis = view.findViewById(R.id.pbAnalysis);
+                    final TextView tvAnalysis = view.findViewById(R.id.tvAnalysis);
+                    final TextView tvLabel = view.findViewById(R.id.tvLabel);
+
+                    tvName.setText(attachment.name);
+                    pbAnalysis.setMax(count);
+                    pbAnalysis.setProgress(malicious);
+                    tvAnalysis.setText(malicious + "/" + count);
+                    tvLabel.setText(label);
+                    tvLabel.setVisibility(TextUtils.isEmpty(label) ? View.GONE : View.VISIBLE);
+
+                    new AlertDialog.Builder(context)
+                            .setView(view)
+                            .setPositiveButton(R.string.title_info, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    Helper.view(context, Uri.parse(uri), true);
+                                }
+                            })
+                            .setNegativeButton(android.R.string.cancel, null)
+                            .show();
+                }
+
+                @Override
+                protected void onException(Bundle args, Throwable ex) {
+                    Log.unexpectedError(parentFragment.getParentFragmentManager(), ex);
+                }
+            }.execute(context, owner, args, "attachment:scan");
+        }
+
         private void onShare(EntityAttachment attachment) {
             String title = (attachment.name == null ? attachment.cid : attachment.name);
             Helper.share(context, attachment.getFile(context), attachment.getMimeType(), title);
@@ -369,6 +443,7 @@ public class AdapterAttachment extends RecyclerView.Adapter<AdapterAttachment.Vi
         this.inflater = LayoutInflater.from(context);
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        this.vt_enabled = (prefs.getBoolean("vt_enabled", false) && !BuildConfig.PLAY_STORE_RELEASE);
         this.debug = prefs.getBoolean("debug", false);
         this.dp12 = Helper.dp2pixels(context, 12);
         this.dp36 = Helper.dp2pixels(context, 36);

@@ -401,7 +401,7 @@ Het blokkeren van een afzenderdomein maakt gebruik van filterregels, wat een pro
     <string name="title_advanced_two_col">Gebruik twee kolommen</string>
     <string name="title_advanced_min_screen_size">Minimale schermgrootte voor het splitsen van het scherm</string>
     <string name="title_advanced_close_pane">Rij of kolom samenvouwen bij het sluiten van een gesprek</string>
-    <string name="title_advanced_column_width">Breedte berichtkolom: %1$s %%</string>
+    <string name="title_advanced_column_width">Berichtkolom breedte / rij hoogte: %1$s %%</string>
     <string name="title_advanced_nav_options">Toon navigatiemenu opties</string>
     <string name="title_advanced_nav_categories">Toon account categorieën in het navigatiemenu</string>
     <string name="title_advanced_nav_pin">Navigatiemenu vastzetten</string>
@@ -1335,6 +1335,10 @@ Het blokkeren van een afzenderdomein maakt gebruik van filterregels, wat een pro
     <string name="title_search_in">Zoeken in</string>
     <string name="title_search_sender">Zoek naar afzender</string>
     <string name="title_search_delete">Opgeslagen zoekopdracht verwijderen?</string>
+    <string name="title_save_search">Opgeslagen zoekopdracht</string>
+    <string name="title_save_search_name">Naam</string>
+    <string name="title_save_search_order">Volgorde</string>
+    <string name="title_save_search_color">Kleur</string>
     <string name="title_sort_on">Sorteer op</string>
     <string name="title_sort_on_time">Tijd</string>
     <string name="title_sort_on_unread">Ongelezen</string>
@@ -1695,7 +1699,6 @@ Het blokkeren van een afzenderdomein maakt gebruik van filterregels, wat een pro
     <string name="title_boundary_retry">Probeer opnieuw</string>
     <string name="title_unexpected_error">Onverwachte fout</string>
     <string name="title_log">Logboek</string>
-    <string name="title_auto_scroll">Automatisch scrollen</string>
     <string name="title_log_clear">Wissen</string>
     <string name="title_rules_search_hint">Zoek naam of voorwaarde</string>
     <string name="title_rules_export">Exporteer regels</string>

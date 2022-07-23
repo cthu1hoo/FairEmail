@@ -407,7 +407,6 @@
     <string name="title_advanced_two_col">Použiť dva stĺpce</string>
     <string name="title_advanced_min_screen_size">Minimálna veľkosť obrazovky pre funkciu rozdelenie obrazovky</string>
     <string name="title_advanced_close_pane">Zbaliť riadok alebo stĺpec pri zatvorení konverzácie</string>
-    <string name="title_advanced_column_width">Šírka stĺpca správy: %1$s %%</string>
     <string name="title_advanced_nav_options">Zobrazovať možnosti navigačnej ponuky</string>
     <string name="title_advanced_nav_categories">Zobrazovať kategórie účtov v navigačnej ponuke</string>
     <string name="title_advanced_nav_pin">Pripnúť navigačnú ponuku</string>
@@ -1315,6 +1314,9 @@ Nastavenie vždy toto kompenzuje neustálym sledovaním zmien.</string>
     <string name="title_search_in">Hľadať v</string>
     <string name="title_search_sender">Hľadať odosielateľa</string>
     <string name="title_search_delete">Vymazať uložené hľadanie?</string>
+    <string name="title_save_search_name">Názov</string>
+    <string name="title_save_search_order">Poradie</string>
+    <string name="title_save_search_color">Farba</string>
     <string name="title_sort_on">Zotriediť</string>
     <string name="title_sort_on_time">Čas</string>
     <string name="title_sort_on_unread">Neprečítané</string>
@@ -1674,7 +1676,6 @@ Nastavenie vždy toto kompenzuje neustálym sledovaním zmien.</string>
     <string name="title_boundary_retry">Skúsiť znovu</string>
     <string name="title_unexpected_error">Neočakávaná chyba</string>
     <string name="title_log">Záznam</string>
-    <string name="title_auto_scroll">Automatické posúvanie</string>
     <string name="title_log_clear">Vymazať</string>
     <string name="title_rules_search_hint">Hľadať názov alebo podmienku</string>
     <string name="title_rules_export">Exportovať pravidlá</string>

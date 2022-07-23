@@ -383,6 +383,7 @@ Fonts, sizes, colors, etc should be material design whenever possible.
 * [(178) Why are widgets not updating?](#user-content-faq178)
 * [(179) What are reply templates?](#user-content-faq179)
 * [(180) How do I use LanguageTool?](#user-content-faq180)
+* [(181) How do I use VirusTotal?](#user-content-faq181)
 
 [I have another question.](#user-content-get-support)
 
@@ -3109,7 +3110,8 @@ Please be aware that removing the storage space will inevitably result in proble
 When needed you can save (raw) messages via the three-dots menu just above the message text
 and save attachments by tapping on the floppy icon.
 
-If you need to save on storage space, you can limit the number of days messages are being synchronized and kept for.
+If you need to save on storage space, you can limit the number of days messages are being synchronized and kept on your device
+and disable downloading and storing of message texts and attachments (which means only message headers will be stored).
 You can change these settings by long pressing a folder in the folder list and selecting *Edit properties*.
 
 <br />
@@ -3396,11 +3398,11 @@ Disabling *Partial fetch* will result in more memory usage.
 &#x1F30E; [Google Translate](https://translate.google.com/translate?sl=en&u=https://github.com/M66B/FairEmail/blob/master/FAQ.md%23user-content-faq111)
 
 OAuth for Gmail is supported via the quick setup wizard.
-The Android account manager will be used to fetch and refresh OAuth tokens for selected on-device accounts.
-OAuth for non on-device accounts is not supported
-because Google requires a [yearly security audit](https://support.google.com/cloud/answer/9110914) ($15,000 to $75,000) for this.
-Since FairEmail is basically offered free of charge, it is not an option to pay such an amount annually for a security audit.
-You can read more about this [here](https://www.theregister.com/2019/02/11/google_gmail_developer/).
+~~The Android account manager will be used to fetch and refresh OAuth tokens for selected on-device accounts.~~
+~~OAuth for non on-device accounts is not supported~~
+~~because Google requires a [yearly security audit](https://support.google.com/cloud/answer/9110914) ($15,000 to $75,000) for this.~~
+~~Since FairEmail is basically offered free of charge, it is not an option to pay such an amount annually for a security audit.~~
+~~You can read more about this [here](https://www.theregister.com/2019/02/11/google_gmail_developer/).~~
 
 OAuth for Outlook/Office 365, Yahoo, Mail.ru and Yandex is supported via the quick setup wizard.
 
@@ -4844,12 +4846,30 @@ Templates can have the following options:
 <a name="faq180"></a>
 **(180) How do I use LanguageTool?**
 
-LanguageTool need to be enabled in the miscellaneous settings.
+LanguageTool integration needs to be enabled in the miscellaneous settings.
 
 After writing some text, you can long press on the save draft button to perform a grammar, style, and spell check via [LanguageTool](https://languagetool.org/).
 Texts with suggestions will be marked and if you tap on a marked suggestion,
 it will be shown by the keyboard if the keyboard supports this,
 else you can double tap or long press the marked text to show suggestions.
+
+<br />
+
+<a name="faq181"></a>
+**(181) How do I use VirusTotal?**
+
+VirusTotal integration needs to be enabled in the miscellaneous settings.
+This will show a *scan* icon button for each attachment.
+
+Without entering an API key, tapping on the scan button will calculate the SHA-256 hash of the attached file and open the corresponding file report on the VirusTotal website.
+If the file is not known by VirusTotal ("*Item not found*"), it is probably okay, unless it contains a new virus not being detected by virus scanners yet.
+
+With entering an API key, there will be a dialog showing the number of virus scanners detecting the file.
+Tapping on the info button will open the corresponding file report on the VirusTotal website.
+
+To get an API key, you'll need to register on the VirusTotal website.
+
+This feature was added in version 1.1941 and is available in non Play store versions only.
 
 <br />
 

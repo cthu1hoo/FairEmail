@@ -19,6 +19,7 @@ package eu.faircode.email;
     Copyright 2018-2022 by Marcel Bokhorst (M66B)
 */
 
+import static android.app.Activity.RESULT_FIRST_USER;
 import static android.app.Activity.RESULT_OK;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
@@ -256,7 +257,8 @@ import me.everything.android.ui.overscroll.IOverScrollUpdateListener;
 import me.everything.android.ui.overscroll.VerticalOverScrollBounceEffectDecorator;
 import me.everything.android.ui.overscroll.adapters.RecyclerViewOverScrollDecorAdapter;
 
-public class FragmentMessages extends FragmentBase implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class FragmentMessages extends FragmentBase
+        implements SharedPreferences.OnSharedPreferenceChangeListener, FragmentManager.OnBackStackChangedListener {
     private ViewGroup view;
     private SwipeRefreshLayoutEx swipeRefresh;
     private TextView tvAirplane;
@@ -427,9 +429,8 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
     static final int REQUEST_BUTTONS = 24;
     private static final int REQUEST_ALL_READ = 25;
     private static final int REQUEST_SAVE_SEARCH = 26;
-    private static final int REQUEST_DELETE_SEARCH = 27;
-    private static final int REQUEST_QUICK_ACTIONS = 28;
-    static final int REQUEST_BLOCK_SENDERS = 29;
+    private static final int REQUEST_QUICK_ACTIONS = 27;
+    static final int REQUEST_BLOCK_SENDERS = 28;
 
     static final String ACTION_STORE_RAW = BuildConfig.APPLICATION_ID + ".STORE_RAW";
     static final String ACTION_DECRYPT = BuildConfig.APPLICATION_ID + ".DECRYPT";
@@ -521,14 +522,20 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
         if (viewType != AdapterMessage.ViewType.THREAD && EntityFolder.ARCHIVE.equals(type))
             filter_archive = false;
 
-        if (viewType != AdapterMessage.ViewType.THREAD)
-            getParentFragmentManager().setFragmentResultListener("message.selected", this, new FragmentResultListener() {
-                @Override
-                public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
-                    long id = result.getLong("id", -1);
-                    iProperties.setValue("selected", id, true);
-                }
-            });
+        try {
+            FragmentManager fm = getParentFragmentManager();
+            if (viewType != AdapterMessage.ViewType.THREAD)
+                fm.setFragmentResultListener("message.selected", this, new FragmentResultListener() {
+                    @Override
+                    public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+                        long id = result.getLong("id", -1);
+                        iProperties.setValue("selected", id, true);
+                    }
+                });
+            fm.addOnBackStackChangedListener(this);
+        } catch (Throwable ex) {
+            Log.e(ex);
+        }
     }
 
     @Override
@@ -1944,7 +1951,30 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
 
     @Override
     public void onDestroy() {
+        try {
+            FragmentManager fm = getParentFragmentManager();
+            fm.removeOnBackStackChangedListener(this);
+        } catch (Throwable ex) {
+            Log.e(ex);
+        }
         super.onDestroy();
+    }
+
+    @Override
+    public void onBackStackChanged() {
+        if (viewType == AdapterMessage.ViewType.THREAD)
+            return;
+
+        FragmentActivity activity = getActivity();
+        FragmentManager fm = getParentFragmentManager();
+        int count = fm.getBackStackEntryCount();
+        boolean split = (activity instanceof ActivityView &&
+                ((ActivityView) activity).isSplit() &&
+                count > 0 && "thread".equals(fm.getBackStackEntryAt(count - 1).getName()));
+        List<Long> ids = values.get("selected");
+        if (ids != null)
+            for (long id : ids)
+                iProperties.setValue("split", id, split);
     }
 
     private void scrollToVisibleItem(LinearLayoutManager llm, boolean bottom) {
@@ -2095,7 +2125,7 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
             } else
                 values.get(name).remove(id);
 
-            if ("selected".equals(name) && enabled) {
+            if ("split".equals(name) || ("selected".equals(name) && enabled)) {
                 if (!getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
                     return;
 
@@ -2105,7 +2135,7 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
                 if (pos != NO_POSITION)
                     changed.add(pos);
 
-                for (Long other : new ArrayList<>(values.get("selected")))
+                for (Long other : new ArrayList<>(values.get(name)))
                     if (!other.equals(id)) {
                         values.get(name).remove(other);
 
@@ -2629,7 +2659,7 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
             if (EntityMessage.SWIPE_ACTION_ASK.equals(action))
                 icon = R.drawable.twotone_help_24;
             else if (EntityMessage.SWIPE_ACTION_SEEN.equals(action))
-                icon = (message.ui_seen ? R.drawable.twotone_drafts_24 : R.drawable.twotone_mail_24);
+                icon = (message.unseen > 0 ? R.drawable.twotone_drafts_24 : R.drawable.twotone_mail_24);
             else if (EntityMessage.SWIPE_ACTION_FLAG.equals(action))
                 icon = (message.ui_flagged ? R.drawable.twotone_star_border_24 : R.drawable.baseline_star_24);
             else if (EntityMessage.SWIPE_ACTION_SNOOZE.equals(action))
@@ -2765,7 +2795,7 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
                 adapter.notifyItemChanged(pos);
                 onSwipeAsk(message, viewHolder);
             } else if (EntityMessage.SWIPE_ACTION_SEEN.equals(action))
-                onActionSeenSelection(!message.ui_seen, message.id, false);
+                onActionSeenSelection(message.unseen > 0, message.id, false);
             else if (EntityMessage.SWIPE_ACTION_FLAG.equals(action))
                 onActionFlagSelection(!message.ui_flagged, Color.TRANSPARENT, message.id, false);
             else if (EntityMessage.SWIPE_ACTION_SNOOZE.equals(action))
@@ -3298,7 +3328,10 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
     }
 
     private void onMenuReply(TupleMessageEx message, String action, CharSequence selected) {
-        Intent reply = new Intent(getContext(), ActivityCompose.class)
+        final Context context = getContext();
+        if (context == null)
+            return;
+        Intent reply = new Intent(context, ActivityCompose.class)
                 .putExtra("action", action)
                 .putExtra("reference", message.id)
                 .putExtra("selected", selected);
@@ -5064,10 +5097,10 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
 
         menu.findItem(R.id.menu_save_search).setVisible(
                 viewType == AdapterMessage.ViewType.SEARCH &&
-                        criteria != null && criteria.id < 0);
-        menu.findItem(R.id.menu_delete_search).setVisible(
+                        criteria != null && criteria.id == null);
+        menu.findItem(R.id.menu_edit_search).setVisible(
                 viewType == AdapterMessage.ViewType.SEARCH &&
-                        criteria != null && criteria.id >= 0);
+                        criteria != null && criteria.id != null);
 
         menu.findItem(R.id.menu_folders).setVisible(
                 viewType == AdapterMessage.ViewType.UNIFIED &&
@@ -5207,11 +5240,8 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
         if (itemId == R.id.menu_search) {
             onMenuSearch();
             return true;
-        } else if (itemId == R.id.menu_save_search) {
+        } else if (itemId == R.id.menu_save_search || itemId == R.id.menu_edit_search) {
             onMenuSaveSearch();
-            return true;
-        } else if (itemId == R.id.menu_delete_search) {
-            onMenuDeleteSearch();
             return true;
         } else if (itemId == R.id.menu_folders) { // Obsolete
             onMenuFolders(primary);
@@ -5349,22 +5379,6 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
         fragment.setArguments(args);
         fragment.setTargetFragment(this, REQUEST_SAVE_SEARCH);
         fragment.show(getParentFragmentManager(), "search:save");
-    }
-
-    private void onMenuDeleteSearch() {
-        if (criteria == null)
-            return;
-
-        Bundle args = new Bundle();
-        args.putString("question", getString(R.string.title_search_delete));
-        args.putString("remark", criteria.getTitle(getContext()));
-        args.putLong("id", criteria.id);
-        args.putBoolean("warning", true);
-
-        FragmentDialogAsk ask = new FragmentDialogAsk();
-        ask.setArguments(args);
-        ask.setTargetFragment(FragmentMessages.this, REQUEST_DELETE_SEARCH);
-        ask.show(getParentFragmentManager(), "swipe:delete");
     }
 
     private void onMenuFolders(long account) {
@@ -5750,16 +5764,28 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
                 BoundaryCallbackMessages.SearchCriteria criteria =
                         (BoundaryCallbackMessages.SearchCriteria) args.getSerializable("criteria");
 
-                EntitySearch search = new EntitySearch();
+                DB db = DB.getInstance(context);
+
+                EntitySearch search = null;
+                if (criteria.id != null)
+                    search = db.search().getSearch(criteria.id);
+                if (search == null)
+                    search = new EntitySearch();
+
+                int order = args.getInt("order");
+
                 search.name = args.getString("name");
+                search.order = (order < 0 ? null : order);
                 search.color = args.getInt("color", Color.TRANSPARENT);
                 search.data = criteria.toJson().toString();
 
                 if (search.color == Color.TRANSPARENT)
                     search.color = null;
 
-                DB db = DB.getInstance(context);
-                search.id = db.search().insertSearch(search);
+                if (search.id == null)
+                    search.id = db.search().insertSearch(search);
+                else
+                    db.search().updateSearch(search);
 
                 return null;
             }
@@ -5780,10 +5806,11 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
         new SimpleTask<Void>() {
             @Override
             protected Void onExecute(Context context, Bundle args) throws Throwable {
-                long id = args.getLong("id");
+                BoundaryCallbackMessages.SearchCriteria criteria =
+                        (BoundaryCallbackMessages.SearchCriteria) args.getSerializable("criteria");
 
                 DB db = DB.getInstance(context);
-                db.search().deleteSearch(id);
+                db.search().deleteSearch(criteria.id);
 
                 return null;
             }
@@ -7774,9 +7801,7 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
                 case REQUEST_SAVE_SEARCH:
                     if (resultCode == RESULT_OK && data != null)
                         onSaveSearch(data.getBundleExtra("args"));
-                    break;
-                case REQUEST_DELETE_SEARCH:
-                    if (resultCode == RESULT_OK && data != null)
+                    else if (resultCode == RESULT_FIRST_USER && data != null)
                         onDeleteSearch(data.getBundleExtra("args"));
                     break;
                 case REQUEST_QUICK_ACTIONS:
@@ -10478,6 +10503,7 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
             final Context context = getContext();
             View dview = LayoutInflater.from(context).inflate(R.layout.dialog_save_search, null);
             EditText etName = dview.findViewById(R.id.etName);
+            EditText etOrder = dview.findViewById(R.id.etOrder);
             btnColor = dview.findViewById(R.id.btnColor);
 
             btnColor.setOnClickListener(new View.OnClickListener() {
@@ -10497,15 +10523,20 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
                 }
             });
 
-            etName.setText(criteria.getTitle(context));
-            btnColor.setColor(Color.TRANSPARENT);
+            etName.setText(criteria.name == null ? criteria.getTitle(context) : criteria.name);
+            etOrder.setText(criteria.order == null ? null : Integer.toString(criteria.order));
+            btnColor.setColor(criteria.color);
 
-            return new AlertDialog.Builder(context)
+            AlertDialog.Builder dialog = new AlertDialog.Builder(context)
                     .setView(dview)
                     .setPositiveButton(R.string.title_save, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+                            String order = etOrder.getText().toString();
                             args.putString("name", etName.getText().toString());
+                            args.putInt("order",
+                                    !TextUtils.isEmpty(order) && TextUtils.isDigitsOnly(order)
+                                            ? Integer.parseInt(order) : -1);
                             args.putInt("color", btnColor.getColor());
                             sendResult(Activity.RESULT_OK);
                         }
@@ -10515,8 +10546,17 @@ public class FragmentMessages extends FragmentBase implements SharedPreferences.
                         public void onClick(DialogInterface dialogInterface, int i) {
                             sendResult(Activity.RESULT_CANCELED);
                         }
-                    })
-                    .create();
+                    });
+
+            if (criteria.id != null)
+                dialog.setNeutralButton(R.string.title_delete, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        sendResult(Activity.RESULT_FIRST_USER);
+                    }
+                });
+
+            return dialog.create();
         }
 
         @Override

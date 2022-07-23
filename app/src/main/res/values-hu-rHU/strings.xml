@@ -369,7 +369,6 @@
     <string name="title_advanced_two_col">Két oszlop használata</string>
     <string name="title_advanced_min_screen_size">Legkisebb képernyő méret a kettévágáshoz</string>
     <string name="title_advanced_close_pane">Sor vagy oszlop összecsukása beszélgetés bezárásánál</string>
-    <string name="title_advanced_column_width">Üzenet oszlop szélesség: %1$s %%</string>
     <string name="title_advanced_nav_options">Navigációs menü opciók mutatása</string>
     <string name="title_advanced_nav_pin">Navigációs menü kitűzése</string>
     <string name="title_advanced_nav_hide_title">Navigációs menü opciók elrejtése?</string>
@@ -1253,6 +1252,9 @@
     <string name="title_search_in">Keresés a következőben</string>
     <string name="title_search_sender">Keresés feladó alapján</string>
     <string name="title_search_delete">Mentett keresés törlése?</string>
+    <string name="title_save_search_name">Név</string>
+    <string name="title_save_search_order">Rendezés</string>
+    <string name="title_save_search_color">Szín</string>
     <string name="title_sort_on">Rendezés ez által</string>
     <string name="title_sort_on_time">Idő</string>
     <string name="title_sort_on_unread">Olvasatlan</string>
@@ -1599,7 +1601,6 @@
     <string name="title_boundary_retry">Próbálja újra</string>
     <string name="title_unexpected_error">Váratlan hiba</string>
     <string name="title_log">Napló</string>
-    <string name="title_auto_scroll">Automatikus görgetés</string>
     <string name="title_log_clear">Törlés</string>
     <string name="title_rules_search_hint">Név vagy feltétel keresése</string>
     <string name="title_rules_export">Szabályok exportálása</string>

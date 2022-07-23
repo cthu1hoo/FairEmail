@@ -123,6 +123,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import org.openintents.openpgp.util.OpenPgpApi;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -178,7 +179,7 @@ public class Helper {
     static final int BUFFER_SIZE = 8192; // Same as in Files class
     static final long MIN_REQUIRED_SPACE = 250 * 1024L * 1024L;
     static final int MAX_REDIRECTS = 5; // https://www.freesoft.org/CIE/RFC/1945/46.htm
-    static final int AUTOLOCK_GRACE = 7; // seconds
+    static final int AUTOLOCK_GRACE = 15; // seconds
     static final long PIN_FAILURE_DELAY = 3; // seconds
 
     static final String PGP_OPENKEYCHAIN_PACKAGE = "org.sufficientlysecure.keychain";
@@ -187,8 +188,8 @@ public class Helper {
 
     static final String PACKAGE_CHROME = "com.android.chrome";
     static final String PACKAGE_WEBVIEW = "https://play.google.com/store/apps/details?id=com.google.android.webview";
-    static final String PRIVACY_URI = "https://email.faircode.eu/PRIVACY.md";
-    static final String TUTORIALS_URI = "https://github.com/M66B/FairEmail/tree/master/tutorials";
+    static final String PRIVACY_URI = "https://github.com/M66B/FairEmail/blob/master/PRIVACY.md";
+    static final String TUTORIALS_URI = "https://github.com/M66B/FairEmail/tree/master/tutorials#main";
     static final String XDA_URI = "https://forum.xda-developers.com/showthread.php?t=3824168";
     static final String SUPPORT_URI = "https://contact.faircode.eu/";
     static final String TEST_URI = "https://play.google.com/apps/testing/" + BuildConfig.APPLICATION_ID;
@@ -916,10 +917,8 @@ public class Helper {
         }
 
         if (!"chooser".equals(open_with_pkg)) {
-            if (open_with_pkg != null && !isInstalled(context, open_with_pkg)) {
+            if (open_with_pkg != null && !isInstalled(context, open_with_pkg))
                 open_with_pkg = null;
-                open_with_tabs = false;
-            }
 
             if (open_with_tabs && !hasCustomTabs(context, uri, open_with_pkg))
                 open_with_tabs = false;
@@ -1151,6 +1150,18 @@ public class Helper {
             PackageInfo pi = pm.getPackageInfo(BuildConfig.APPLICATION_ID, 0);
             if (pi != null)
                 return pi.firstInstallTime;
+        } catch (Throwable ex) {
+            Log.e(ex);
+        }
+        return 0;
+    }
+
+    static long getUpdateTime(Context context) {
+        try {
+            PackageManager pm = context.getPackageManager();
+            PackageInfo pi = pm.getPackageInfo(BuildConfig.APPLICATION_ID, 0);
+            if (pi != null)
+                return pi.lastUpdateTime;
         } catch (Throwable ex) {
             Log.e(ex);
         }
@@ -2377,6 +2388,17 @@ public class Helper {
     static String sha(String digest, byte[] data) throws NoSuchAlgorithmException {
         byte[] bytes = MessageDigest.getInstance(digest).digest(data);
         return hex(bytes);
+    }
+
+    static String getHash(InputStream is, String algorithm) throws NoSuchAlgorithmException, IOException {
+        MessageDigest digest = MessageDigest.getInstance(algorithm);
+
+        int count;
+        byte[] buffer = new byte[BUFFER_SIZE];
+        while ((count = is.read(buffer)) != -1)
+            digest.update(buffer, 0, count);
+
+        return hex(digest.digest());
     }
 
     static String hex(byte[] bytes) {

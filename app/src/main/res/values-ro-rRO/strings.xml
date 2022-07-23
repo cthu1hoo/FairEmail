@@ -176,6 +176,7 @@
     <string name="title_setup_gmail_support">Autorizarea conturilor Google va funcționa în versiunea Play Store și GitHub doar pentru că Android verifică semnătura digitală a aplicației</string>
     <string name="title_setup_gmail_rationale">Vă rugăm să acordați permisiunea de a selecta un cont și a vă citi numele</string>
     <string name="title_setup_gmail_permissions">Google va cere permisiunea de a citi, compune, trimite și șterge în mod permanent mesajele dumneavoastră. de email. FairEmail nu vă va șterge niciodată mesajele fără consimțământul dumneavoastră explicit.</string>
+    <string name="title_setup_gmail_on_device">De ce trebuie să selectez un cont pe dispozitiv?</string>
     <string name="title_setup_gmail_password">Vreau să autorizez un cont cu o parolă în loc de un cont pe dispozitiv</string>
     <string name="title_setup_office_auth">Eroarea \'Autentificare eșuată\' poate fi cauzată de dezactivarea administrativă a IMAP/SMTP</string>
     <string name="title_setup_oauth_rationale">Autorizare acces la contul %1$s</string>
@@ -412,7 +413,7 @@
     <string name="title_advanced_two_col">Utilizați două coloane</string>
     <string name="title_advanced_min_screen_size">Dimensiunea minimă a ecranului pentru împărțirea ecranului</string>
     <string name="title_advanced_close_pane">Restrângerea unui rând sau a unei coloane la închiderea unei conversații</string>
-    <string name="title_advanced_column_width">Lățimea coloanei de mesaje: %1$s %%</string>
+    <string name="title_advanced_column_width">Lățimea coloanei mesajului / înălțimea rândului: %1$s %%</string>
     <string name="title_advanced_nav_options">Afișați opțiunile din meniul de navigare</string>
     <string name="title_advanced_nav_categories">Afișați categoriile de conturi în meniul de navigare</string>
     <string name="title_advanced_nav_pin">Meniul de navigare Pin</string>
@@ -1349,6 +1350,10 @@
     <string name="title_search_in">Căutare în</string>
     <string name="title_search_sender">Căutare expeditor</string>
     <string name="title_search_delete">Ștergeți căutarea salvată?</string>
+    <string name="title_save_search">Căutare salvată</string>
+    <string name="title_save_search_name">Nume</string>
+    <string name="title_save_search_order">Ordine</string>
+    <string name="title_save_search_color">Culoare</string>
     <string name="title_sort_on">Sortare</string>
     <string name="title_sort_on_time">Dată</string>
     <string name="title_sort_on_unread">Necitit</string>
@@ -1711,7 +1716,6 @@
     <string name="title_boundary_retry">Reîncearcă</string>
     <string name="title_unexpected_error">Eroare neașteptată</string>
     <string name="title_log">Raport</string>
-    <string name="title_auto_scroll">Auto derulare</string>
     <string name="title_log_clear">Curăță</string>
     <string name="title_rules_search_hint">Căutare nume sau condiție</string>
     <string name="title_rules_export">Exportă regulile</string>

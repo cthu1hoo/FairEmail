@@ -176,6 +176,7 @@
     <string name="title_setup_gmail_support">Autorizacija Google računa radit će samo u verzijama Play trgovine i GitHub-a, jer Android provjerava digitalne potpise aplikacija</string>
     <string name="title_setup_gmail_rationale">Molimo da potvrdite dopuštenja za izbor računa i čitanje vašeg imena</string>
     <string name="title_setup_gmail_permissions">Google će pitati za dopuštenja za čitanje, pisanje, slanje i trajno brisanje svih vaših poruka. FairEmail nikada neće brisati vaše poruke bez vaše saglasnosti.</string>
+    <string name="title_setup_gmail_on_device">Zašto trebam izabrati račun na lokalnom uređaju?</string>
     <string name="title_setup_gmail_password">Želim autorizovati račun sa lozinkom umjesto lokalnog računa na uređaju</string>
     <string name="title_setup_office_auth">Greška \'PROVJERA nije uspjela\' može biti uzrokovana postavkama IMAP/SMTP-a koje je isključio sistemski administrator</string>
     <string name="title_setup_oauth_rationale">Autorizuj pristup vašem%1$s računu</string>
@@ -413,7 +414,7 @@
     <string name="title_advanced_two_col">Koristi dvije kolone</string>
     <string name="title_advanced_min_screen_size">Minimalna veličina ekrana za podijeljeni ekran</string>
     <string name="title_advanced_close_pane">Suzi red ili kolonu pri zatvaranju konverzacije</string>
-    <string name="title_advanced_column_width">Širina popisne kolone: %1$s %%</string>
+    <string name="title_advanced_column_width">Širina kolone / visina reda poruka: %1$s %%</string>
     <string name="title_advanced_nav_options">Prikaži opcije navigacijskog menija</string>
     <string name="title_advanced_nav_categories">Prikaži kategorije računa u navigacijskom meniju</string>
     <string name="title_advanced_nav_pin">Zakači navigacijski meni</string>
@@ -1353,6 +1354,10 @@
     <string name="title_search_in">Traži u</string>
     <string name="title_search_sender">Traži pošiljaoca</string>
     <string name="title_search_delete">Izbrisati sačuvanu pretragu?</string>
+    <string name="title_save_search">Sačuvana pretraga</string>
+    <string name="title_save_search_name">Naziv</string>
+    <string name="title_save_search_order">Redoslijed</string>
+    <string name="title_save_search_color">Boja</string>
     <string name="title_sort_on">Sortiraj prema</string>
     <string name="title_sort_on_time">Vremenu</string>
     <string name="title_sort_on_unread">Nepročitano</string>
@@ -1716,7 +1721,6 @@
     <string name="title_boundary_retry">Pokušaj ponovo</string>
     <string name="title_unexpected_error">Neočekivana greška</string>
     <string name="title_log">Zapisnik</string>
-    <string name="title_auto_scroll">Auto pomicanje</string>
     <string name="title_log_clear">Očisti</string>
     <string name="title_rules_search_hint">Traži ime ili uvjet</string>
     <string name="title_rules_export">Izvezi pravila</string>

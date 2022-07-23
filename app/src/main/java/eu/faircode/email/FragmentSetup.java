@@ -47,7 +47,6 @@ import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.TouchDelegate;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -278,9 +277,9 @@ public class FragmentSetup extends FragmentBase {
 
                 Resources res = context.getResources();
                 String pkg = context.getPackageName();
-
-                boolean web = false;
                 List<EmailProvider> providers = EmailProvider.loadProfiles(context);
+
+                boolean web = BuildConfig.DEBUG;
                 for (EmailProvider provider : providers)
                     if ("gmail".equals(provider.id) &&
                             provider.oauth != null &&
@@ -291,6 +290,7 @@ public class FragmentSetup extends FragmentBase {
 
                 int order = 1;
 
+                // Gmail / account manager
                 String gmail = getString(web ? R.string.title_setup_android : R.string.title_setup_oauth,
                         getString(R.string.title_setup_gmail));
                 MenuItem item = menu.add(Menu.FIRST, R.string.title_setup_gmail, order++, gmail);
@@ -298,6 +298,7 @@ public class FragmentSetup extends FragmentBase {
                 if (resid != 0)
                     item.setIcon(resid);
 
+                // OAuth
                 for (EmailProvider provider : providers)
                     if (provider.oauth != null &&
                             (provider.oauth.enabled || BuildConfig.DEBUG) &&
@@ -915,28 +916,6 @@ public class FragmentSetup extends FragmentBase {
         boolean setup_welcome = prefs.getBoolean("setup_welcome", true);
         ibWelcome.setImageLevel(setup_welcome ? 0 /* less */ : 1 /* more */);
         grpWelcome.setVisibility(setup_welcome ? View.VISIBLE : View.GONE);
-
-        ViewGroup vwWelcome = (ViewGroup) ibWelcome.getParent();
-        if (vwWelcome == null)
-            return;
-
-        vwWelcome.post(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (!getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
-                        return;
-                    Rect rect = new Rect(
-                            vwWelcome.getLeft(),
-                            ibWelcome.getTop(),
-                            vwWelcome.getRight(),
-                            ibWelcome.getBottom());
-                    vwWelcome.setTouchDelegate(new TouchDelegate(rect, ibWelcome));
-                } catch (Throwable ex) {
-                    Log.e(ex);
-                }
-            }
-        });
     }
 
     private void updateManual() {
@@ -964,28 +943,6 @@ public class FragmentSetup extends FragmentBase {
                 ? View.VISIBLE : View.GONE);
 
         grpExtra.setVisibility(setup_extra ? View.VISIBLE : View.GONE);
-
-        ViewGroup vwExtra = (ViewGroup) ibExtra.getParent();
-        if (vwExtra == null)
-            return;
-
-        vwExtra.post(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (!getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
-                        return;
-                    Rect rect = new Rect(
-                            vwExtra.getLeft(),
-                            ibExtra.getTop(),
-                            vwExtra.getRight(),
-                            ibExtra.getBottom());
-                    vwExtra.setTouchDelegate(new TouchDelegate(rect, ibExtra));
-                } catch (Throwable ex) {
-                    Log.e(ex);
-                }
-            }
-        });
     }
 
     private void ensureVisible(View child) {

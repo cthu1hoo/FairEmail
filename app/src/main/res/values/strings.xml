@@ -481,7 +481,7 @@
     <string name="title_advanced_two_col">Use two columns</string>
     <string name="title_advanced_min_screen_size">Minimum screen size for splitting the screen</string>
     <string name="title_advanced_close_pane">Collapse row or column when closing a conversation</string>
-    <string name="title_advanced_column_width">Message column width: %1$s %%</string>
+    <string name="title_advanced_column_width">Message column width / row height: %1$s %%</string>
     <string name="title_advanced_nav_options">Show navigation menu options</string>
     <string name="title_advanced_nav_categories">Show account categories in the navigation menu</string>
     <string name="title_advanced_nav_pin">Pin navigation menu</string>
@@ -733,6 +733,7 @@
     <string name="title_advanced_language_system">System</string>
     <string name="title_advanced_lt">LanguageTool integration</string>
     <string name="title_advanced_deepl">DeepL integration</string>
+    <string name="title_advanced_virus_total">VirusTotal integration</string>
     <string name="title_advanced_sdcard">I want to use an sdcard</string>
     <string name="title_advanced_watchdog">Periodically check if FairEmail is still active</string>
     <string name="title_advanced_updates">Check for GitHub updates</string>
@@ -1573,6 +1574,11 @@
 
     <string name="title_search_delete">Delete saved search?</string>
 
+    <string name="title_save_search">Saved search</string>
+    <string name="title_save_search_name">Name</string>
+    <string name="title_save_search_order">Order</string>
+    <string name="title_save_search_color">Color</string>
+
     <string name="title_sort_on">Sort on</string>
     <string name="title_sort_on_time">Time</string>
     <string name="title_sort_on_unread">Unread</string>
@@ -1968,7 +1974,6 @@
 
     <string name="title_unexpected_error">Unexpected error</string>
     <string name="title_log">Log</string>
-    <string name="title_auto_scroll">Auto scroll</string>
     <string name="title_log_clear">Clear</string>
     <string name="title_rules_search_hint">Search name or condition</string>
     <string name="title_rules_export">Export rules</string>
