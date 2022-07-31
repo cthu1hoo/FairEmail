@@ -19,17 +19,19 @@ package eu.faircode.email;
     Copyright 2018-2022 by Marcel Bokhorst (M66B)
 */
 
+import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -37,6 +39,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
@@ -47,10 +50,12 @@ import androidx.lifecycle.OnLifecycleEvent;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.ListUpdateCallback;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.File;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -67,6 +72,7 @@ public class AdapterAttachment extends RecyclerView.Adapter<AdapterAttachment.Vi
 
     private boolean readonly;
     private boolean vt_enabled;
+    private String vt_apikey;
     private boolean debug;
     private int dp12;
     private int dp36;
@@ -86,6 +92,8 @@ public class AdapterAttachment extends RecyclerView.Adapter<AdapterAttachment.Vi
         private TextView tvType;
         private TextView tvError;
         private ProgressBar progressbar;
+
+        private TwoStateOwner powner = new TwoStateOwner(owner, "AttachmentPopup");
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -108,8 +116,7 @@ public class AdapterAttachment extends RecyclerView.Adapter<AdapterAttachment.Vi
             view.setOnClickListener(this);
             ibDelete.setOnClickListener(this);
             ibSave.setOnClickListener(this);
-            if (vt_enabled)
-                ibScan.setOnClickListener(this);
+            ibScan.setOnClickListener(this);
             view.setOnLongClickListener(this);
         }
 
@@ -117,8 +124,7 @@ public class AdapterAttachment extends RecyclerView.Adapter<AdapterAttachment.Vi
             view.setOnClickListener(null);
             ibDelete.setOnClickListener(null);
             ibSave.setOnClickListener(null);
-            if (vt_enabled)
-                ibScan.setOnClickListener(null);
+            ibScan.setOnClickListener(null);
             view.setOnLongClickListener(null);
         }
 
@@ -177,7 +183,9 @@ public class AdapterAttachment extends RecyclerView.Adapter<AdapterAttachment.Vi
             }
 
             ibSave.setVisibility(attachment.available ? View.VISIBLE : View.GONE);
-            ibScan.setVisibility(attachment.available && vt_enabled ? View.VISIBLE : View.GONE);
+            ibScan.setVisibility(attachment.available &&
+                    vt_enabled && !TextUtils.isEmpty(vt_apikey) && !BuildConfig.PLAY_STORE_RELEASE
+                    ? View.VISIBLE : View.GONE);
 
             if (attachment.progress != null)
                 progressbar.setProgress(attachment.progress);
@@ -314,63 +322,13 @@ public class AdapterAttachment extends RecyclerView.Adapter<AdapterAttachment.Vi
 
         private void onScan(EntityAttachment attachment) {
             Bundle args = new Bundle();
-            args.putLong("id", attachment.id);
+            args.putString("apiKey", vt_apikey);
+            args.putString("name", attachment.name);
+            args.putSerializable("file", attachment.getFile(context));
 
-            new SimpleTask<Bundle>() {
-                @Override
-                protected Bundle onExecute(Context context, Bundle args) throws Throwable {
-                    long id = args.getLong("id");
-
-                    DB db = DB.getInstance(context);
-                    EntityAttachment attachment = db.attachment().getAttachment(id);
-                    if (attachment == null)
-                        return null;
-
-                    return VirusTotal.scan(context, attachment.getFile(context));
-                }
-
-                @Override
-                protected void onExecuted(Bundle args, Bundle result) {
-                    String uri = result.getString("uri");
-                    int count = result.getInt("count", -1);
-                    int malicious = result.getInt("malicious", -1);
-                    String label = result.getString("label");
-
-                    if (count < 0) {
-                        Helper.view(context, Uri.parse(uri), true);
-                        return;
-                    }
-
-                    View view = LayoutInflater.from(context).inflate(R.layout.dialog_virus_total, null);
-                    final TextView tvName = view.findViewById(R.id.tvName);
-                    final ProgressBar pbAnalysis = view.findViewById(R.id.pbAnalysis);
-                    final TextView tvAnalysis = view.findViewById(R.id.tvAnalysis);
-                    final TextView tvLabel = view.findViewById(R.id.tvLabel);
-
-                    tvName.setText(attachment.name);
-                    pbAnalysis.setMax(count);
-                    pbAnalysis.setProgress(malicious);
-                    tvAnalysis.setText(malicious + "/" + count);
-                    tvLabel.setText(label);
-                    tvLabel.setVisibility(TextUtils.isEmpty(label) ? View.GONE : View.VISIBLE);
-
-                    new AlertDialog.Builder(context)
-                            .setView(view)
-                            .setPositiveButton(R.string.title_info, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    Helper.view(context, Uri.parse(uri), true);
-                                }
-                            })
-                            .setNegativeButton(android.R.string.cancel, null)
-                            .show();
-                }
-
-                @Override
-                protected void onException(Bundle args, Throwable ex) {
-                    Log.unexpectedError(parentFragment.getParentFragmentManager(), ex);
-                }
-            }.execute(context, owner, args, "attachment:scan");
+            FragmentDialogVirusTotal fragment = new FragmentDialogVirusTotal();
+            fragment.setArguments(args);
+            fragment.show(parentFragment.getParentFragmentManager(), "attachment:scan");
         }
 
         private void onShare(EntityAttachment attachment) {
@@ -443,7 +401,8 @@ public class AdapterAttachment extends RecyclerView.Adapter<AdapterAttachment.Vi
         this.inflater = LayoutInflater.from(context);
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        this.vt_enabled = (prefs.getBoolean("vt_enabled", false) && !BuildConfig.PLAY_STORE_RELEASE);
+        this.vt_enabled = prefs.getBoolean("vt_enabled", false);
+        this.vt_apikey = prefs.getString("vt_apikey", null);
         this.debug = prefs.getBoolean("debug", false);
         this.dp12 = Helper.dp2pixels(context, 12);
         this.dp36 = Helper.dp2pixels(context, 36);
@@ -558,8 +517,214 @@ public class AdapterAttachment extends RecyclerView.Adapter<AdapterAttachment.Vi
         holder.unwire();
 
         EntityAttachment attachment = items.get(position);
+        holder.powner.recreate(attachment == null ? null : attachment.id);
         holder.bindTo(attachment);
 
         holder.wire();
+    }
+
+    public static class FragmentDialogVirusTotal extends FragmentDialogBase {
+        @NonNull
+        @Override
+        public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+            Bundle args = getArguments();
+            String apiKey = args.getString("apiKey");
+            String name = args.getString("name");
+
+            final Context context = getContext();
+            View view = LayoutInflater.from(context).inflate(R.layout.dialog_virus_total, null);
+            final TextView tvName = view.findViewById(R.id.tvName);
+            final TextView tvError = view.findViewById(R.id.tvError);
+            final TextView tvUnknown = view.findViewById(R.id.tvUnknown);
+            final TextView tvSummary = view.findViewById(R.id.tvSummary);
+            final TextView tvLabel = view.findViewById(R.id.tvLabel);
+            final TextView tvReport = view.findViewById(R.id.tvReport);
+            final RecyclerView rvScan = view.findViewById(R.id.rvScan);
+            final Button btnUpload = view.findViewById(R.id.btnUpload);
+            final ProgressBar pbUpload = view.findViewById(R.id.pbUpload);
+            final TextView tvAnalyzing = view.findViewById(R.id.tvAnalyzing);
+            final TextView tvPrivacy = view.findViewById(R.id.tvPrivacy);
+            final ProgressBar pbWait = view.findViewById(R.id.pbWait);
+
+            tvName.setText(name);
+            tvName.setVisibility(TextUtils.isEmpty(name) ? View.GONE : View.VISIBLE);
+            tvError.setVisibility(View.GONE);
+            tvUnknown.setVisibility(View.GONE);
+            tvSummary.setVisibility(View.GONE);
+            tvLabel.setVisibility(View.GONE);
+            tvReport.setVisibility(View.GONE);
+            tvReport.getPaint().setUnderlineText(true);
+
+            rvScan.setHasFixedSize(false);
+            LinearLayoutManager llm = new LinearLayoutManager(getContext());
+            rvScan.setLayoutManager(llm);
+
+            final AdapterVirusTotal adapter = new AdapterVirusTotal(getContext(), getViewLifecycleOwner());
+            rvScan.setAdapter(adapter);
+
+            rvScan.setVisibility(View.GONE);
+
+            btnUpload.setVisibility(View.GONE);
+            pbUpload.setVisibility(View.GONE);
+            tvAnalyzing.setVisibility(View.GONE);
+            tvPrivacy.setVisibility(View.GONE);
+            tvPrivacy.getPaint().setUnderlineText(true);
+            pbWait.setVisibility(View.GONE);
+
+            final SimpleTask<Bundle> taskLookup = new SimpleTask<Bundle>() {
+                @Override
+                protected void onPreExecute(Bundle args) {
+                    tvError.setVisibility(View.GONE);
+                    pbWait.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                protected void onPostExecute(Bundle args) {
+                    pbWait.setVisibility(View.GONE);
+                }
+
+                @Override
+                protected Bundle onExecute(Context context, Bundle args) throws Throwable {
+                    String apiKey = args.getString("apiKey");
+                    File file = (File) args.getSerializable("file");
+                    return VirusTotal.lookup(context, file, apiKey);
+                }
+
+                @Override
+                protected void onExecuted(Bundle args, Bundle result) {
+                    List<VirusTotal.ScanResult> scans = result.getParcelableArrayList("scans");
+                    String label = result.getString("label");
+                    String analysis = args.getString("analysis");
+
+                    int malicious = 0;
+                    if (scans != null)
+                        for (VirusTotal.ScanResult scan : scans)
+                            if ("malicious".equals(scan.category))
+                                malicious++;
+
+                    NumberFormat NF = NumberFormat.getNumberInstance();
+
+                    tvUnknown.setVisibility(scans == null ? View.VISIBLE : View.GONE);
+                    tvSummary.setText(getString(R.string.title_vt_summary, NF.format(malicious)));
+                    tvSummary.setTextColor(Helper.resolveColor(context,
+                            malicious == 0 ? android.R.attr.textColorPrimary : R.attr.colorWarning));
+                    tvSummary.setTypeface(malicious == 0 ? Typeface.DEFAULT : Typeface.DEFAULT_BOLD);
+                    tvSummary.setVisibility(scans == null ? View.GONE : View.VISIBLE);
+                    tvLabel.setText(label);
+                    tvReport.setVisibility(scans == null ? View.GONE : View.VISIBLE);
+                    adapter.set(scans == null ? new ArrayList<>() : scans);
+                    rvScan.setVisibility(scans == null ? View.GONE : View.VISIBLE);
+                    btnUpload.setVisibility(scans == null && !TextUtils.isEmpty(apiKey) ? View.VISIBLE : View.GONE);
+                    tvPrivacy.setVisibility(btnUpload.getVisibility());
+
+                    if (analysis != null && args.getBoolean("init")) {
+                        args.remove("init");
+                        btnUpload.callOnClick();
+                    }
+                }
+
+                @Override
+                protected void onException(Bundle args, Throwable ex) {
+                    tvError.setText(Log.formatThrowable(ex, false));
+                    tvError.setVisibility(View.VISIBLE);
+                }
+            };
+
+            final SimpleTask<Void> taskUpload = new SimpleTask<Void>() {
+                @Override
+                protected void onPreExecute(Bundle args) {
+                    btnUpload.setEnabled(false);
+                    pbUpload.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                protected void onPostExecute(Bundle args) {
+                    btnUpload.setEnabled(true);
+                    tvAnalyzing.setVisibility(View.GONE);
+                    pbUpload.setVisibility(View.GONE);
+                }
+
+                @Override
+                protected Void onExecute(Context context, Bundle args) throws Throwable {
+                    String apiKey = args.getString("apiKey");
+                    File file = (File) args.getSerializable("file");
+
+                    String analysis = args.getString("analysis");
+                    if (analysis == null) {
+                        analysis = VirusTotal.upload(context, file, apiKey);
+                        args.putString("analysis", analysis);
+                    }
+                    postProgress(analysis);
+                    VirusTotal.waitForAnalysis(context, analysis, apiKey);
+                    return null;
+                }
+
+                @Override
+                protected void onProgress(CharSequence status, Bundle data) {
+                    tvAnalyzing.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                protected void onExecuted(Bundle args, Void data) {
+                    taskLookup.execute(FragmentDialogVirusTotal.this, args, "attachment:lookup");
+                }
+
+                @Override
+                protected void onException(Bundle args, Throwable ex) {
+                    Log.unexpectedError(getParentFragmentManager(), ex);
+                }
+            };
+
+            final SimpleTask<String> taskUrl = new SimpleTask<String>() {
+                @Override
+                protected String onExecute(Context context, Bundle args) throws Throwable {
+                    File file = (File) args.getSerializable("file");
+                    return VirusTotal.getUrl(file);
+                }
+
+                @Override
+                protected void onExecuted(Bundle args, String uri) {
+                    Helper.view(context, Uri.parse(uri), true);
+                }
+
+                @Override
+                protected void onException(Bundle args, Throwable ex) {
+                    Log.unexpectedError(getParentFragmentManager(), ex);
+                }
+            };
+
+            tvReport.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    taskUrl.execute(FragmentDialogVirusTotal.this, args, "attachment:report");
+                }
+            });
+
+            btnUpload.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    taskUpload.execute(FragmentDialogVirusTotal.this, args, "attachment:upload");
+                }
+            });
+
+            tvPrivacy.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Helper.view(v.getContext(), Uri.parse(VirusTotal.URI_PRIVACY), true);
+                }
+            });
+
+            if (TextUtils.isEmpty(apiKey))
+                pbWait.setVisibility(View.GONE);
+            else {
+                args.putBoolean("init", true);
+                taskLookup.execute(this, args, "attachment:lookup");
+            }
+
+            return new AlertDialog.Builder(context)
+                    .setView(view)
+                    .setNegativeButton(R.string.title_setup_done, null)
+                    .create();
+        }
     }
 }

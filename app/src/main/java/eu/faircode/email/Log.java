@@ -2212,6 +2212,12 @@ public class Log {
                     } catch (Throwable ignored) {
                     }
 
+                Integer filter = null;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    NotificationManager nm = Helper.getSystemService(context, NotificationManager.class);
+                    filter = nm.getCurrentInterruptionFilter();
+                }
+
                 size += write(os, "enabled=" + enabled + (enabled ? "" : " !!!") +
                         " interval=" + pollInterval + "\r\n" +
                         "metered=" + metered + (metered ? "" : " !!!") +
@@ -2219,11 +2225,14 @@ public class Log {
                         " vpn=" + vpn + (vpn ? " !!!" : "") +
                         " ng=" + ng + " tc=" + tc + "\r\n" +
                         "optimizing=" + (ignoring == null ? null : !ignoring) + (Boolean.FALSE.equals(ignoring) ? " !!!" : "") +
-                        " bucket=" +
-                        (bucket == null ? null : Helper.getStandbyBucketName(bucket)) +
-                        (bucket != null && bucket > UsageStatsManager.STANDBY_BUCKET_ACTIVE ? " !!!" : "") +
+                        " bucket=" + (bucket == null ? null :
+                        Helper.getStandbyBucketName(bucket) +
+                                (bucket > UsageStatsManager.STANDBY_BUCKET_ACTIVE ? " !!!" : "")) +
                         " canSchedule=" + canSchedule + (canSchedule ? "" : " !!!") +
-                        " auto_optimize=" + auto_optimize + (auto_optimize ? " !!!" : "") + "\r\n" +
+                        " auto_optimize=" + auto_optimize + (auto_optimize ? " !!!" : "") +
+                        " notifications=" + (filter == null ? null :
+                        Helper.getInterruptionFilter(filter) +
+                                (filter == NotificationManager.INTERRUPTION_FILTER_ALL ? "" : "!!!")) + "\r\n" +
                         "accounts=" + accounts.size() +
                         " folders=" + db.folder().countTotal() +
                         " messages=" + db.message().countTotal() +
@@ -2279,7 +2288,7 @@ public class Log {
                                 " ondemand=" + account.ondemand +
                                 " msgs=" + content + "/" + messages +
                                 " ops=" + db.operation().getOperationCount(account.id) +
-                                " ischedule=" + ignore_schedule + (ignore_schedule ? " !!!" : "") +
+                                " schedule=" + (!ignore_schedule) + (ignore_schedule ? " !!!" : "") +
                                 " unmetered=" + unmetered + (unmetered ? " !!!" : "") +
                                 " " + account.state +
                                 (account.last_connected == null ? "" : " " + dtf.format(account.last_connected)) +
@@ -2674,37 +2683,21 @@ public class Log {
                             paused, (paused ? "!!!" : "")));
                 }
 
-                String name;
                 int filter = nm.getCurrentInterruptionFilter();
-                switch (filter) {
-                    case NotificationManager.INTERRUPTION_FILTER_UNKNOWN:
-                        name = "Unknown";
-                        break;
-                    case NotificationManager.INTERRUPTION_FILTER_ALL:
-                        name = "All";
-                        break;
-                    case NotificationManager.INTERRUPTION_FILTER_PRIORITY:
-                        name = "Priority";
-                        break;
-                    case NotificationManager.INTERRUPTION_FILTER_NONE:
-                        name = "None";
-                        break;
-                    case NotificationManager.INTERRUPTION_FILTER_ALARMS:
-                        name = "Alarms";
-                        break;
-                    default:
-                        name = Integer.toString(filter);
-                }
-
                 size += write(os, String.format("Interruption filter allow=%s %s\r\n\r\n",
-                        name, (filter == NotificationManager.INTERRUPTION_FILTER_ALL ? "" : "!!!")));
+                        Helper.getInterruptionFilter(filter),
+                        (filter == NotificationManager.INTERRUPTION_FILTER_ALL ? "" : "!!!")));
+
+                size += write(os, String.format("InCall=%b DND=%b\r\n\r\n",
+                        MediaPlayerHelper.isInCall(context),
+                        MediaPlayerHelper.isDnd(context)));
 
                 for (NotificationChannel channel : nm.getNotificationChannels())
                     try {
                         JSONObject jchannel = NotificationHelper.channelToJSON(channel);
                         size += write(os, jchannel.toString(2) + "\r\n\r\n");
                     } catch (JSONException ex) {
-                        size += write(os, ex.toString() + "\r\n");
+                        size += write(os, ex + "\r\n");
                     }
 
                 size += write(os,
@@ -2721,6 +2714,11 @@ public class Log {
                                 Notification.VISIBILITY_PRIVATE,
                                 Notification.VISIBILITY_PUBLIC,
                                 Notification.VISIBILITY_SECRET));
+                size += write(os, String.format("Interruption filter\r\n"));
+                size += write(os, String.format("- All: no notifications are suppressed.\r\n"));
+                size += write(os, String.format("- Priority: all notifications are suppressed except those that match the priority criteria. Some audio streams are muted.\r\n"));
+                size += write(os, String.format("- None: all notifications are suppressed and all audio streams (except those used for phone calls) and vibrations are muted.\r\n"));
+                size += write(os, String.format("- Alarm: all notifications except those of category alarm are suppressed. Some audio streams are muted.\r\n"));
             }
 
             db.attachment().setDownloaded(attachment.id, size);

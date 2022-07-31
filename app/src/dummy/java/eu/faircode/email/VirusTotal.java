@@ -21,13 +21,66 @@ package eu.faircode.email;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import androidx.annotation.NonNull;
 
 import java.io.File;
 
 public class VirusTotal {
     static final String URI_PRIVACY = "";
 
-    static Bundle scan(Context context, File file) {
+    static String getUrl(File file) {
         return null;
+    }
+
+    static Bundle lookup(Context context, File file, String apiKey) {
+        return null;
+    }
+
+    static String upload(Context context, File file, String apiKey) {
+        return null;
+    }
+
+    static void waitForAnalysis(Context context, String id, String apiKey) {
+    }
+
+    public static class ScanResult implements Parcelable {
+        public String name;
+        public String category;
+
+        ScanResult(String name, String category) {
+            this.name = name;
+            this.category = category;
+        }
+
+        protected ScanResult(Parcel in) {
+            name = in.readString();
+            category = in.readString();
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel parcel, int i) {
+            parcel.writeString(name);
+            parcel.writeString(category);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        public static final Creator<ScanResult> CREATOR = new Creator<ScanResult>() {
+            @Override
+            public ScanResult createFromParcel(Parcel in) {
+                return new ScanResult(in);
+            }
+
+            @Override
+            public ScanResult[] newArray(int size) {
+                return new ScanResult[size];
+            }
+        };
     }
 }

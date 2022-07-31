@@ -384,6 +384,7 @@ Fonts, sizes, colors, etc should be material design whenever possible.
 * [(179) What are reply templates?](#user-content-faq179)
 * [(180) How do I use LanguageTool?](#user-content-faq180)
 * [(181) How do I use VirusTotal?](#user-content-faq181)
+* [(182) How can I select how a link should be opened?](#user-content-faq182)
 
 [I have another question.](#user-content-get-support)
 
@@ -1809,8 +1810,6 @@ this is even less secure because Google is involved too without providing much b
 
 You can show images and original messages by default for trusted senders on a case-by-case basis by checking *Do not ask this again for ...*.
 
-If you want to reset the default *Open with* apps, please [see here](https://support.google.com/pixelphone/answer/6271667).
-
 <br />
 
 <a name="faq36"></a>
@@ -1983,7 +1982,7 @@ The error '*Handshake failed SSL handshake terminated ... SSLV3_ALERT_HANDSHAKE_
 can be caused by [this Android 7.0 bug](https://issuetracker.google.com/issues/37122132). This can unfortunately not be fixed by FairEmail.
 
 The error '*Handshake failed ... UNSUPPORTED_PROTOCOL or TLSV1_ALERT_PROTOCOL_VERSION or SSLV3_ALERT_HANDSHAKE_FAILURE ...*'
-might be caused by enabling hardening connections in the connection settings
+might be caused by enabling hardening connections, or requiring TLS 1.3 in the connection settings
 or by Android not supporting older protocols anymore, like SSLv3.
 
 Android 8 Oreo and later [do not support](https://developer.android.com/about/versions/oreo/android-8.0-changes#security-all) SSLv3 anymore.
@@ -4714,6 +4713,7 @@ Related questions:
 * The Play Store version does not support Gravatars/Libravatars due to Play Store policies
 * The GitHub version will check for [updates on GitHub](https://github.com/M66B/FairEmail/releases) and is updated more frequently
 * The GitHub version has some different links, some more options (like sharing the HTML of a message) and some different default values (more geared to advanced users)
+* The GitHub version can be installed as an update over the Play store version
 * The F-Droid build does not support OAuth, see [this FAQ](#user-content-faq147) about why not
 * The F-Droid build does not include [Google Play Billing](https://developer.android.com/google/play/billing/integrate), so Play store purchases cannot be reused
 * The F-Droid build is supported only if the version number is the same as the the version number of the latest GitHub version, see also [this FAQ](#user-content-faq147)
@@ -4858,18 +4858,38 @@ else you can double tap or long press the marked text to show suggestions.
 <a name="faq181"></a>
 **(181) How do I use VirusTotal?**
 
-VirusTotal integration needs to be enabled in the miscellaneous settings.
-This will show a *scan* icon button for each attachment.
+VirusTotal integration needs to be enabled in the miscellaneous settings and an API key needs to be entered.
+To get an API key, you'll need to sign up via the [VirusTotal website](https://www.virustotal.com/).
 
-Without entering an API key, tapping on the scan button will calculate the SHA-256 hash of the attached file and open the corresponding file report on the VirusTotal website.
-If the file is not known by VirusTotal ("*Item not found*"), it is probably okay, unless it contains a new virus not being detected by virus scanners yet.
+When integration is enabled and an API key is available, a *scan* icon button will be shown for each attachment.
+Tapping on the scan button will calculate the SHA-256 hash of the attachment and lookup the file via the VirusTotal API.
+If the file is known by VirusTotal, the number of virus scanners considering the file as malicious will be shown.
+If the file isn't known by VirusTotal, an upload button will be shown to upload the file for analysis by VirusTotal.
 
-With entering an API key, there will be a dialog showing the number of virus scanners detecting the file.
-Tapping on the info button will open the corresponding file report on the VirusTotal website.
+This feature was added in version 1.1942 and is available in non Play store versions of the app only.
 
-To get an API key, you'll need to register on the VirusTotal website.
+<br />
 
-This feature was added in version 1.1941 and is available in non Play store versions only.
+
+<a name="faq182"></a>
+**(182) How can I select how a link should be opened?**
+
+When clicking on a link, a confirmation dialog will be shown. You can select how to open a link below *Open with*.
+The available browser(s) will be listed and if a browser supports [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/), it will be listed twice,
+once with an "open external" icon (the browser will be started standalone, independent of the app)
+and once without this icon (the browser will be started embedded as "Custom Tab", dependent of the app).
+In addition, *Select app* will be listed, which means that the link will be handed over to Android, which will select how to open the link.
+In most cases, this will be with the default browser, which you can select in the Android settings.
+If there is choice, Android will ask you how to open the link. You can select *Always* or *Just Once*.
+If you want to reset *Always*, please [see here](https://support.google.com/pixelphone/answer/6271667) about how to.
+
+If you ticked *Do not ask this again for [domain name]*, you can undo this by using the *Reset questions* button in the miscellaneous settings tab page of the app.
+
+If you disabled confirming links, you can enable this (temporarily) again in the privacy settings tab page of the app (*Confirm opening links*: off).
+
+Note that you might need to enable confirming links and reset questions to show the link confirmation dialog again.
+
+Please see [this FAQ](#user-content-faq35) on why you should be careful when opening links.
 
 <br />
 
