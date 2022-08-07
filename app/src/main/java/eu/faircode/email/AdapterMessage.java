@@ -116,6 +116,7 @@ import androidx.appcompat.widget.PopupMenu;
 import androidx.constraintlayout.helper.widget.Flow;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.Group;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.core.content.pm.ShortcutInfoCompat;
 import androidx.core.graphics.ColorUtils;
@@ -2937,7 +2938,7 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
                                     new DynamicDrawableSpan() {
                                         @Override
                                         public Drawable getDrawable() {
-                                            Drawable d = context.getDrawable(R.drawable.twotone_format_quote_24);
+                                            Drawable d = ContextCompat.getDrawable(context, R.drawable.twotone_format_quote_24);
                                             d.setTint(colorAccent);
                                             d.setBounds(0, 0, px, px);
                                             return d;
@@ -5537,7 +5538,7 @@ public class AdapterMessage extends RecyclerView.Adapter<AdapterMessage.ViewHold
             popupMenu.getMenu().findItem(R.id.menu_alternative)
                     .setTitle(message.isPlainOnly()
                             ? R.string.title_alternative_html : R.string.title_alternative_text)
-                    .setEnabled(message.uid != null && message.hasAlt())
+                    .setEnabled(message.uid != null && message.hasAlt() && !message.isEncrypted())
                     .setVisible(message.accountProtocol == EntityAccount.TYPE_IMAP);
 
             popupMenu.insertIcons(context);
