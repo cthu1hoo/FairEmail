@@ -1274,11 +1274,24 @@ public class FragmentMessages extends FragmentBase
             }
 
             private void onActionSnooze() {
+                Long time = null;
+                List<TupleMessageEx> list = adapter.getCurrentList();
+                if (list != null)
+                    for (TupleMessageEx message : list)
+                        if (message != null && message.ui_snoozed != null) {
+                            if (time == null || message.ui_snoozed < time || message.id.equals(id))
+                                time = message.ui_snoozed;
+                            if (message.id.equals(id))
+                                break;
+                        }
+
                 Bundle args = new Bundle();
                 args.putString("title", getString(R.string.title_snooze));
                 args.putLong("account", account);
                 args.putString("thread", thread);
                 args.putLong("id", id);
+                if (time != null)
+                    args.putLong("time", time);
                 args.putBoolean("finish", true);
 
                 FragmentDialogDuration fragment = new FragmentDialogDuration();
@@ -2112,7 +2125,10 @@ public class FragmentMessages extends FragmentBase
     private AdapterMessage.IProperties iProperties = new AdapterMessage.IProperties() {
         @Override
         public void setValue(String key, String value) {
-            kv.put(key, value);
+            if (value == null)
+                kv.remove(key);
+            else
+                kv.put(key, value);
         }
 
         @Override
@@ -2159,6 +2175,11 @@ public class FragmentMessages extends FragmentBase
                     }
                 });
             }
+        }
+
+        @Override
+        public String getValue(String key) {
+            return kv.get(key);
         }
 
         @Override
@@ -2922,6 +2943,8 @@ public class FragmentMessages extends FragmentBase
                                 args.putLong("account", message.account);
                                 args.putString("thread", message.thread);
                                 args.putLong("id", message.id);
+                                if (message.ui_snoozed != null)
+                                    args.putLong("time", message.ui_snoozed);
                                 args.putBoolean("finish", false);
 
                                 FragmentDialogDuration fragment = new FragmentDialogDuration();
@@ -6115,7 +6138,7 @@ public class FragmentMessages extends FragmentBase
                 protected void onException(Bundle args, Throwable ex) {
                     Log.unexpectedError(getParentFragmentManager(), ex);
                 }
-            }.setExecutor(executor).execute(this, args, "quickactions");
+            }.setExecutor(executor).setId("messages:" + FragmentMessages.this.hashCode()).execute(this, args, "quickactions");
         } else {
             fabMore.hide();
             tvSelectedCount.setVisibility(View.GONE);
@@ -8092,7 +8115,7 @@ public class FragmentMessages extends FragmentBase
                                 } else {
                                     // Decode message
                                     MessageHelper.MessageParts parts;
-                                    Properties props = MessageHelper.getSessionProperties();
+                                    Properties props = MessageHelper.getSessionProperties(true);
                                     Session isession = Session.getInstance(props, null);
                                     MimeMessage imessage;
                                     try (InputStream fis = new FileInputStream(plain)) {
@@ -8791,7 +8814,7 @@ public class FragmentMessages extends FragmentBase
                 boolean duplicate = args.getBoolean("duplicate");
 
                 // Decode message
-                Properties props = MessageHelper.getSessionProperties();
+                Properties props = MessageHelper.getSessionProperties(true);
                 Session isession = Session.getInstance(props, null);
                 MimeMessage imessage = new MimeMessage(isession, is);
                 MessageHelper helper = new MessageHelper(imessage, context);
@@ -8904,7 +8927,7 @@ public class FragmentMessages extends FragmentBase
         for (EntityAttachment remote : remotes)
             if ("message/rfc822".equals(remote.getMimeType()))
                 try {
-                    Properties props = MessageHelper.getSessionProperties();
+                    Properties props = MessageHelper.getSessionProperties(true);
                     Session isession = Session.getInstance(props, null);
 
                     MimeMessage imessage;
@@ -9545,7 +9568,7 @@ public class FragmentMessages extends FragmentBase
 
                                     HttpURLConnection connection = null;
                                     try {
-                                        connection = Helper.openUrlRedirect(context, src, timeout);
+                                        connection = ConnectionHelper.openConnectionUnsafe(context, src, timeout, timeout);
                                         Helper.copy(connection.getInputStream(), os);
                                     } finally {
                                         if (connection != null)

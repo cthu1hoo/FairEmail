@@ -24,6 +24,9 @@ import static eu.faircode.email.GmailState.TYPE_GOOGLE;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.content.Context;
+import android.content.SharedPreferences;
+
+import androidx.preference.PreferenceManager;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
@@ -61,6 +64,7 @@ public class ServiceAuthenticator extends Authenticator {
             Context context,
             int auth, String provider,
             String user, String password,
+            boolean check,
             IAuthenticated intf) {
         this.context = context.getApplicationContext();
         this.auth = auth;
@@ -68,6 +72,13 @@ public class ServiceAuthenticator extends Authenticator {
         this.user = user;
         this.password = password;
         this.intf = intf;
+
+        if (check) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+            String key = getTokenKey(provider, user);
+            prefs.edit().remove(key).apply();
+            EntityLog.log(context, "Removed " + key);
+        }
     }
 
     @Override
@@ -150,13 +161,28 @@ public class ServiceAuthenticator extends Authenticator {
             long now = new Date().getTime();
             Long expiration = authState.getAccessTokenExpirationTime();
             boolean needsRefresh = (expiration != null && expiration < now);
-            if (needsRefresh)
-                authState.setNeedsTokenRefresh(true);
 
             if (!needsRefresh && forceRefresh &&
                     expiration != null &&
                     expiration - ServiceAuthenticator.MIN_FORCE_REFRESH_INTERVAL < now)
+                needsRefresh = true;
+
+            if (needsRefresh)
                 authState.setNeedsTokenRefresh(true);
+
+            if (needsRefresh || authState.getNeedsTokenRefresh()) {
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+                String key = getTokenKey(id, user);
+                long last_refresh = prefs.getLong(key, 0);
+                long ago = now - last_refresh;
+                EntityLog.log(context, EntityLog.Type.Debug, "Token needs refresh" +
+                        " user=" + id + ":" + user + " ago=" + (ago / 60 / 1000L) + " min");
+                if (ago < ServiceAuthenticator.MIN_FORCE_REFRESH_INTERVAL) {
+                    Log.e("Blocked token refresh id=" + id + " ago=" + (ago / 1000L) + " s");
+                    return;
+                }
+                prefs.edit().putLong(key, now).apply();
+            }
 
             EntityLog.log(context, EntityLog.Type.Debug, "Token user=" + id + ":" + user +
                     " expiration=" + (expiration == null ? null : new Date(expiration)) +
@@ -193,8 +219,12 @@ public class ServiceAuthenticator extends Authenticator {
             if (holder.error != null)
                 throw holder.error;
         } catch (Exception ex) {
-            throw new MessagingException("OAuth refresh id=" + id + ":" + user, ex);
+            throw new MessagingException("OAuth refresh id=" + id, ex);
         }
+    }
+
+    static String getTokenKey(String id, String user) {
+        return "token." + id + "." + user;
     }
 
     static String getAuthTokenType(String type) {

@@ -60,6 +60,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.TransactionTooLargeException;
+import android.os.ext.SdkExtensions;
 import android.provider.Settings;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -141,6 +142,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
@@ -1876,6 +1878,7 @@ public class Log {
         sb.append(String.format("Updated: %s\r\n", new Date(Helper.getUpdateTime(context))));
         sb.append(String.format("Last cleanup: %s\r\n", new Date(last_cleanup)));
         sb.append(String.format("Now: %s\r\n", new Date()));
+        sb.append(String.format("Zone: %s\r\n", TimeZone.getDefault().getID()));
 
         sb.append("\r\n");
 
@@ -2301,7 +2304,8 @@ public class Log {
                             if (folder.synchronize) {
                                 int unseen = db.message().countUnseen(folder.id);
                                 int notifying = db.message().countNotifying(folder.id);
-                                size += write(os, "- " + folder.name + " " + folder.type +
+                                size += write(os, "- " + folder.name + " " +
+                                        folder.type + (folder.inherited_type == null ? "" : "/" + folder.inherited_type) +
                                         (folder.unified ? " unified" : "") +
                                         (folder.notify ? " notify" : "") +
                                         " poll=" + folder.poll + "/" + folder.poll_factor +
@@ -2375,6 +2379,7 @@ public class Log {
                                 Collections.sort(folders, folders.get(0).getComparator(context));
                             for (EntityFolder folder : folders) {
                                 JSONObject jfolder = folder.toJSON();
+                                jfolder.put("inherited_type", folder.inherited_type);
                                 jfolder.put("level", folder.level);
                                 jfolder.put("total", folder.total);
                                 jfolder.put("initialize", folder.initialize);
@@ -2774,6 +2779,14 @@ public class Log {
                 size += write(os, String.format("Database: %s\r\n",
                         context.getDatabasePath(DB.DB_NAME)));
                 size += write(os, "\r\n");
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    Map<Integer, Integer> exts = SdkExtensions.getAllExtensionVersions();
+                    for (Integer ext : exts.keySet())
+                        size += write(os, String.format("Extension %d / %d\r\n", ext, exts.get(ext)));
+                    if (exts.size() > 0)
+                        size += write(os, "\r\n");
+                }
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     try {

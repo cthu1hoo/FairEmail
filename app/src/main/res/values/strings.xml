@@ -473,6 +473,7 @@
     <string name="title_advanced_ssl_harden">Harden SSL connections</string>
     <string name="title_advanced_ssl_harden_strict">Require TLS 1.3</string>
     <string name="title_advanced_cert_strict">Strict certificate checking</string>
+    <string name="title_advanced_open_unsafe">Open insecure connections</string>
     <string name="title_advanced_manage_connectivity">Manage connectivity</string>
 
     <string name="title_advanced_caption_general">General</string>
@@ -598,6 +599,7 @@
     <string name="title_advanced_conversation_actions">Suggest actions (Android 10+)</string>
     <string name="title_advanced_conversation_actions_replies">Suggest reply texts (Android 10+)</string>
     <string name="title_advanced_language_detection">Detect message text language</string>
+    <string name="title_advanced_photo_picker">Use the Android photo picker</string>
     <string name="title_advanced_pull_refresh">Pull down to refresh</string>
     <string name="title_advanced_autoscroll">Scroll to top on receiving new messages</string>
     <string name="title_advanced_double_tap">Double tap to mark message read/unread</string>
@@ -803,6 +805,7 @@
     <string name="title_advanced_exact_alarms" translatable="false">Use exact timers</string>
     <string name="title_advanced_infra" translatable="false">Show infrastructure</string>
     <string name="title_advanced_dup_msgid" translatable="false">Duplicates by message ID</string>
+    <string name="title_advanced_global_keywords" translatable="false">Global keywords</string>
     <string name="title_advanced_test_iab" translatable="false">Test IAB</string>
     <string name="title_advanced_import_providers" translatable="false">Import providers</string>
     <string name="title_advanced_processors" translatable="false">Processors: %1$d</string>
@@ -863,6 +866,7 @@
     <string name="title_advanced_timeout_hint">The read/write timeout will be set to the double of the connection timeout. Higher values will result in more battery use.</string>
     <string name="title_advanced_cert_strict_hint">Disabling this will relax checking of server certificates</string>
     <string name="title_advanced_ssl_harden_hint">Enabling this will disable weak SSL protocols and ciphers, which can lead to connection problems</string>
+    <string name="title_advanced_open_unsafe_hint">Disabling this will require secure connections to download images</string>
     <string name="title_advanced_roaming_hint">Messages headers will always be fetched when roaming. You can use the device\'s roaming setting to disable internet while roaming.</string>
 
     <string name="title_advanced_browse_hint">Fetch more messages when scrolling down</string>
@@ -929,6 +933,7 @@
     <string name="title_advanced_debug_hint">This will show ugly debug information at various places</string>
     <string name="title_advanced_cleanup_attachments_hint">When manually cleaning, this will remove attachments from messages that are no longer synchronized</string>
     <string name="title_advanced_cleanup_hint">This will delete all temporary files</string>
+    <string name="title_advanced_keywords_hint" translatable="false">Space separated</string>
 
     <string name="title_advanced_never_favorite">Never favorite</string>
     <string name="title_advanced_edit_name">Edit name</string>

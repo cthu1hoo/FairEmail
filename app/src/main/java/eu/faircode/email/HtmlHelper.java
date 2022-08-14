@@ -2413,7 +2413,7 @@ public class HtmlHelper {
         StringBuilder sb = new StringBuilder();
         sb.append("<style type=\"text/css\">");
         for (String tag : tags)
-            sb.append(tag).append("{width: auto !important; min-width: 0 !important;max-width: 100% !important;}");
+            sb.append(tag).append("{width: auto !important; min-width: 0 !important; max-width: 100% !important; overflow: auto !important;}");
         sb.append("</style>");
 
         document.select("head").append(sb.toString());
@@ -2783,7 +2783,7 @@ public class HtmlHelper {
 
             MailDateFormat mdf = new MailDateFormat();
             ByteArrayInputStream bis = new ByteArrayInputStream(headers.getBytes());
-            InternetHeaders iheaders = new InternetHeaders(bis);
+            InternetHeaders iheaders = new InternetHeaders(bis, true);
 
             String dh = iheaders.getHeader("Date", null);
             Date tx = null;
