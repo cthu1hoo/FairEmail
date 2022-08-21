@@ -36,6 +36,7 @@ import androidx.preference.PreferenceManager;
 import com.sun.mail.iap.ConnectionException;
 import com.sun.mail.util.FolderClosedIOException;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.Inet4Address;
@@ -673,19 +674,19 @@ public class ConnectionHelper {
 
     static HttpURLConnection openConnectionUnsafe(Context context, URL url, int ctimeout, int rtimeout) throws IOException {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        boolean open_unsafe = prefs.getBoolean("open_unsafe", true);
+        boolean open_safe = prefs.getBoolean("open_safe", false);
 
         int redirects = 0;
         while (true) {
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");
             urlConnection.setDoOutput(false);
-            urlConnection.setReadTimeout(ctimeout);
-            urlConnection.setConnectTimeout(rtimeout);
+            urlConnection.setReadTimeout(rtimeout);
+            urlConnection.setConnectTimeout(ctimeout);
             urlConnection.setInstanceFollowRedirects(true);
 
             if (urlConnection instanceof HttpsURLConnection) {
-                if (open_unsafe)
+                if (!open_safe)
                     ((HttpsURLConnection) urlConnection).setHostnameVerifier(new HostnameVerifier() {
                         @Override
                         public boolean verify(String hostname, SSLSession session) {
@@ -693,7 +694,7 @@ public class ConnectionHelper {
                         }
                     });
             } else {
-                if (!open_unsafe)
+                if (open_safe)
                     throw new IOException("https required url=" + url);
             }
 
@@ -703,7 +704,7 @@ public class ConnectionHelper {
             try {
                 int status = urlConnection.getResponseCode();
 
-                if (open_unsafe &&
+                if (!open_safe &&
                         (status == HttpURLConnection.HTTP_MOVED_PERM ||
                                 status == HttpURLConnection.HTTP_MOVED_TEMP ||
                                 status == HttpURLConnection.HTTP_SEE_OTHER ||
@@ -724,6 +725,8 @@ public class ConnectionHelper {
                     continue;
                 }
 
+                if (status == HttpURLConnection.HTTP_NOT_FOUND)
+                    throw new FileNotFoundException("Error " + status + ": " + urlConnection.getResponseMessage());
                 if (status != HttpURLConnection.HTTP_OK)
                     throw new IOException("Error " + status + ": " + urlConnection.getResponseMessage());
 

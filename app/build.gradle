@@ -3,7 +3,7 @@ apply plugin: 'com.bugsnag.android.gradle'
 apply plugin: 'kotlin-android'
 apply plugin: 'de.undercouch.download'
 
-def getVersionCode = { -> return 1950 }
+def getVersionCode = { -> return 1956 }
 def getRevision = { -> return "a" }
 def getReleaseName = { -> return "Ledumahadi" }
 // https://en.wikipedia.org/wiki/List_of_dinosaur_genera
@@ -358,7 +358,7 @@ dependencies {
     def lifecycle_extensions_version = "2.2.0"
     def room_version = "2.4.3" // 2.5.0-alpha02
     def sqlite_version = "2.2.0" // 2.3.0-alpha04
-    def requery_version = "3.39.0-1"
+    def requery_version = "3.39.2"
     def paging_version = "2.1.2" //  3.2.0-alpha01
     def preference_version = "1.2.0"
     def work_version = "2.7.1" // 2.8.0-alpha03

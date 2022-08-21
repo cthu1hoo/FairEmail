@@ -945,27 +945,21 @@ public class Helper {
         if (task)
             view.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        if ("chooser".equals(open_with_pkg)) {
+        if ("chooser".equals(open_with_pkg) && !open_with_tabs) {
             try {
-                if (open_with_tabs) {
-                    EntityLog.log(context, "Launching direct uri=" + uri +
-                            " intent=" + view +
-                            " extras=" + TextUtils.join(", ", Log.getExtras(view.getExtras())));
-                    context.startActivity(view);
-                } else {
-                    EntityLog.log(context, "Launching chooser uri=" + uri +
-                            " intent=" + view +
-                            " extras=" + TextUtils.join(", ", Log.getExtras(view.getExtras())));
-                    Intent chooser = Intent.createChooser(view, context.getString(R.string.title_select_app));
-                    context.startActivity(chooser);
-                }
+                EntityLog.log(context, "Launching chooser uri=" + uri +
+                        " intent=" + view +
+                        " extras=" + TextUtils.join(", ", Log.getExtras(view.getExtras())));
+                Intent chooser = Intent.createChooser(view, context.getString(R.string.title_select_app));
+                context.startActivity(chooser);
             } catch (ActivityNotFoundException ex) {
                 Log.w(ex);
                 reportNoViewer(context, uri, ex);
             }
         } else if (browse || !open_with_tabs) {
             try {
-                view.setPackage(open_with_pkg);
+                if (!"chooser".equals(open_with_pkg))
+                    view.setPackage(open_with_pkg);
                 EntityLog.log(context, "Launching view uri=" + uri +
                         " intent=" + view +
                         " extras=" + TextUtils.join(", ", Log.getExtras(view.getExtras())));
@@ -1015,7 +1009,8 @@ public class Helper {
 
             CustomTabsIntent customTabsIntent = builder.build();
             customTabsIntent.intent.putExtra(Browser.EXTRA_HEADERS, headers);
-            customTabsIntent.intent.setPackage(open_with_pkg);
+            if (!"chooser".equals(open_with_pkg))
+                customTabsIntent.intent.setPackage(open_with_pkg);
 
             try {
                 EntityLog.log(context, "Launching tab uri=" + uri +
@@ -2881,6 +2876,20 @@ public class Helper {
         List<List<T>> result = new ArrayList<>(list.size() / size);
         for (int i = 0; i < list.size(); i += size)
             result.add(list.subList(i, i + size < list.size() ? i + size : list.size()));
+        return result;
+    }
+
+    static int[] toIntArray(List<Integer> list) {
+        int[] result = new int[list.size()];
+        for (int i = 0; i < list.size(); i++)
+            result[i] = list.get(i);
+        return result;
+    }
+
+    static List<Integer> fromIntArray(int[] array) {
+        List<Integer> result = new ArrayList<>();
+        for (int i = 0; i < array.length; i++)
+            result.add(array[i]);
         return result;
     }
 

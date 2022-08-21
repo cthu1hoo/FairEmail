@@ -1463,22 +1463,6 @@ public class FragmentCompose extends FragmentBase {
             }
 
             private void convertRef(boolean plain) {
-                if (plain)
-                    _convertRef(plain);
-                else
-                    new AlertDialog.Builder(getContext())
-                            .setMessage(R.string.title_ask_show_html)
-                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    _convertRef(false);
-                                }
-                            })
-                            .setNegativeButton(android.R.string.cancel, null)
-                            .show();
-            }
-
-            private void _convertRef(boolean plain) {
                 etBody.clearComposingText();
 
                 Bundle args = new Bundle();
@@ -3720,6 +3704,7 @@ public class FragmentCompose extends FragmentBase {
                     }
 
                 // Build message to sign
+                //   openssl smime -verify <xxx.eml
                 Properties props = MessageHelper.getSessionProperties(true);
                 Session isession = Session.getInstance(props, null);
                 MimeMessage imessage = new MimeMessage(isession);
@@ -3938,8 +3923,9 @@ public class FragmentCompose extends FragmentBase {
                 // Encrypt
                 CMSEnvelopedDataGenerator cmsEnvelopedDataGenerator = new CMSEnvelopedDataGenerator();
                 if ("EC".equals(privkey.getAlgorithm())) {
+                    // https://datatracker.ietf.org/doc/html/draft-ietf-smime-3278bis
                     JceKeyAgreeRecipientInfoGenerator gen = new JceKeyAgreeRecipientInfoGenerator(
-                            CMSAlgorithm.ECDH_SHA256KDF,
+                            CMSAlgorithm.ECCDH_SHA256KDF,
                             privkey,
                             chain[0].getPublicKey(),
                             CMSAlgorithm.AES128_WRAP);
