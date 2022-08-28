@@ -123,21 +123,23 @@ Related questions:
 * Search suggestions causes the keyboard losing focus on Android 12L
 
 <a name="redmi"></a>
+<a name="oneplus"></a>
 
 <br />
 
-**Xiaomi Redmi Note**
+**Xiaomi Redmi / OnePlus**
 
 &#x1F30E; [Google Translate](https://translate.google.com/translate?sl=en&u=https://github.com/M66B/FairEmail/blob/master/FAQ.md%23redmi)
 
-On Xiaomi Redmi Note devices the database occasionally gets corrupted, resulting in total data loss
+On some Xiaomi Redmi (Note) and some OnePlus devices the database occasionally gets corrupted, resulting in total data loss
 (on the device only, unless you are using a POP3 account with the option *Leave messages on server* disabled).
 
-The cause of this problem are disk I/O errors due to an Android bug or maybe a hardware issue, please [see here](https://www.sqlite.org/rescode.html#ioerr_write).
+The cause of this problem are disk I/O errors due to an Android bug (more likely) or maybe a hardware issue (less likely),
+please [see here](https://www.sqlite.org/rescode.html#ioerr_write).
 
 "*This error might result from a hardware malfunction or because a filesystem came unmounted while the file was open.*"
 
-This can't be fixed by the app and should be fixed by Xiaomi / Redmi.
+This can't be fixed by the app and should be fixed by manufacturer of the device.
 
 **Please do not blame the app for this!**
 
@@ -2622,6 +2624,8 @@ $$replydomain$
 $$nofrom$ (since version 1.1791)
 $$multifrom$ (since version 1.1791)
 $$automatic$ (since version 1.1862)
+$$lowpriority$ (since version 1.1958)
+$$highpriority$ (since version 1.1958)
 ```
 
 Note that *regex* should be disable and that there should be no white space.
