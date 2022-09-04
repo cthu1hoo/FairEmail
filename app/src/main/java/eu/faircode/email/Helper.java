@@ -174,7 +174,7 @@ public class Helper {
     static final float LOW_LIGHT = 0.6f;
 
     static final int BUFFER_SIZE = 8192; // Same as in Files class
-    static final long MIN_REQUIRED_SPACE = 250 * 1024L * 1024L;
+    static final long MIN_REQUIRED_SPACE = 100 * 1000L * 1000L;
     static final int AUTOLOCK_GRACE = 15; // seconds
     static final long PIN_FAILURE_DELAY = 3; // seconds
 
@@ -2149,6 +2149,21 @@ public class Helper {
 
     static boolean isDot(char c) {
         return (c == '.' /* Latin */ || c == '。' /* Chinese */);
+    }
+
+    static String trim(String value, String chars) {
+        if (value == null)
+            return null;
+
+        for (Character kar : chars.toCharArray()) {
+            String k = kar.toString();
+            while (value.startsWith(k))
+                value = value.substring(1);
+            while (value.endsWith(k))
+                value = value.substring(0, value.length() - 1);
+        }
+
+        return value;
     }
 
     // Files

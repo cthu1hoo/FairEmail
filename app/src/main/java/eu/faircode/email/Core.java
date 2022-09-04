@@ -2771,15 +2771,31 @@ class Core {
 
             EntityLog.log(context, folder.name + " purging=" + idelete.size() + "/" + imessages.length);
             if (account.isYahooJp()) {
-                for (Message imessage : idelete)
-                    imessage.setFlag(Flags.Flag.DELETED, true);
+                for (Message imessage : new ArrayList<>(idelete))
+                    try {
+                        imessage.setFlag(Flags.Flag.DELETED, true);
+                    } catch (MessagingException mex) {
+                        Log.w(mex);
+                        idelete.remove(imessage);
+                    }
             } else {
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
                 int chunk_size = prefs.getInt("chunk_size", DEFAULT_CHUNK_SIZE);
 
                 Flags flags = new Flags(Flags.Flag.DELETED);
                 for (List<Message> list : Helper.chunkList(idelete, chunk_size))
-                    ifolder.setFlags(list.toArray(new Message[0]), flags, true);
+                    try {
+                        ifolder.setFlags(list.toArray(new Message[0]), flags, true);
+                    } catch (MessagingException ex) {
+                        Log.w(ex);
+                        for (Message imessage : list)
+                            try {
+                                imessage.setFlag(Flags.Flag.DELETED, true);
+                            } catch (MessagingException mex) {
+                                Log.w(mex);
+                                idelete.remove(imessage);
+                            }
+                    }
             }
             Log.i(folder.name + " purge deleted");
             expunge(context, ifolder, idelete);
@@ -4055,6 +4071,30 @@ class Core {
 
                         message = dup;
                         process = true;
+                    } else if (msgid != null && EntityFolder.DRAFTS.equals(folder.type)) {
+                        try {
+                            if (dup.uid < uid) {
+                                MimeMessage existing = (MimeMessage) ifolder.getMessageByUID(dup.uid);
+                                if (existing != null &&
+                                        msgid.equals(existing.getHeader(MessageHelper.HEADER_CORRELATION_ID, null))) {
+                                    Log.e(folder.name + " late draft" +
+                                            " host=" + account.host + " uid=" + dup.uid + "<" + uid);
+                                    existing.setFlag(Flags.Flag.DELETED, true);
+                                    expunge(context, ifolder, Arrays.asList(existing));
+                                    db.message().setMessageUiHide(dup.id, true);
+                                }
+                            } else if (dup.uid > uid) {
+                                if (msgid.equals(imessage.getHeader(MessageHelper.HEADER_CORRELATION_ID, null))) {
+                                    Log.e(folder.name + " late draft" +
+                                            " host=" + account.host + " uid=" + dup.uid + ">" + uid);
+                                    imessage.setFlag(Flags.Flag.DELETED, true);
+                                    expunge(context, ifolder, Arrays.asList(imessage));
+                                    return null;
+                                }
+                            }
+                        } catch (Throwable ex) {
+                            Log.e(ex);
+                        }
                     }
                 }
 

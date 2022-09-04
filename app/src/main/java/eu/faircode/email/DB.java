@@ -6,6 +6,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabaseCorruptException;
 import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
@@ -71,7 +72,7 @@ import io.requery.android.database.sqlite.SQLiteDatabase;
 // https://developer.android.com/topic/libraries/architecture/room.html
 
 @Database(
-        version = 242,
+        version = 243,
         entities = {
                 EntityIdentity.class,
                 EntityAccount.class,
@@ -142,15 +143,38 @@ public abstract class DB extends RoomDatabase {
 
     @Override
     public void init(@NonNull DatabaseConfiguration configuration) {
-        // https://www.sqlite.org/pragma.html#pragma_wal_autocheckpoint
-        if (BuildConfig.DEBUG) {
-            File dbfile = configuration.context.getDatabasePath(DB_NAME);
-            if (dbfile.exists()) {
-                try (SQLiteDatabase db = SQLiteDatabase.openDatabase(dbfile.getPath(), null, SQLiteDatabase.OPEN_READWRITE)) {
-                    Log.i("Set PRAGMA wal_autocheckpoint=" + DB_CHECKPOINT);
-                    try (Cursor cursor = db.rawQuery("PRAGMA wal_autocheckpoint=" + DB_CHECKPOINT + ";", null)) {
-                        cursor.moveToNext(); // required
+        File dbfile = configuration.context.getDatabasePath(DB_NAME);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(configuration.context);
+        boolean sqlite_integrity_check = prefs.getBoolean("sqlite_integrity_check", true);
+
+        // https://www.sqlite.org/pragma.html#pragma_integrity_check
+        if (sqlite_integrity_check && dbfile.exists()) {
+            String check = (Helper.isRedmiNote() || Helper.isOnePlus() || BuildConfig.DEBUG
+                    ? "integrity_check" : "quick_check");
+            try (SQLiteDatabase db = SQLiteDatabase.openDatabase(dbfile.getPath(), null, SQLiteDatabase.OPEN_READWRITE)) {
+                Log.i("PRAGMA " + check);
+                try (Cursor cursor = db.rawQuery("PRAGMA " + check + ";", null)) {
+                    while (cursor.moveToNext()) {
+                        String line = cursor.getString(0);
+                        if ("ok".equals(line))
+                            Log.i("PRAGMA " + check + "=" + line);
+                        else
+                            Log.e("PRAGMA " + check + "=" + line);
                     }
+                }
+            } catch (SQLiteDatabaseCorruptException ex) {
+                Log.e(ex);
+                dbfile.delete();
+            }
+        }
+
+        // https://www.sqlite.org/pragma.html#pragma_wal_autocheckpoint
+        if (BuildConfig.DEBUG && dbfile.exists()) {
+            try (SQLiteDatabase db = SQLiteDatabase.openDatabase(dbfile.getPath(), null, SQLiteDatabase.OPEN_READWRITE)) {
+                Log.i("Set PRAGMA wal_autocheckpoint=" + DB_CHECKPOINT);
+                try (Cursor cursor = db.rawQuery("PRAGMA wal_autocheckpoint=" + DB_CHECKPOINT + ";", null)) {
+                    cursor.moveToNext(); // required
                 }
             }
         }
@@ -410,10 +434,18 @@ public abstract class DB extends RoomDatabase {
 
                         // https://www.sqlite.org/pragma.html#pragma_auto_vacuum
                         // https://android.googlesource.com/platform/external/sqlite.git/+/6ab557bdc070f11db30ede0696888efd19800475%5E!/
-                        boolean sqlite_auto_vacuum = prefs.getBoolean("sqlite_auto_vacuum", !Helper.isRedmiNote());
+                        boolean sqlite_auto_vacuum = prefs.getBoolean("sqlite_auto_vacuum", false);
                         String mode = (sqlite_auto_vacuum ? "FULL" : "INCREMENTAL");
                         Log.i("Set PRAGMA auto_vacuum = " + mode);
                         try (Cursor cursor = db.query("PRAGMA auto_vacuum = " + mode + ";", null)) {
+                            cursor.moveToNext(); // required
+                        }
+
+                        // https://sqlite.org/pragma.html#pragma_synchronous
+                        boolean sqlite_sync_extra = prefs.getBoolean("sqlite_sync_extra", true);
+                        String sync = (sqlite_sync_extra ? "EXTRA" : "NORMAL");
+                        Log.i("Set PRAGMA synchronous = " + sync);
+                        try (Cursor cursor = db.query("PRAGMA synchronous = " + sync + ";", null)) {
                             cursor.moveToNext(); // required
                         }
 
@@ -2418,12 +2450,19 @@ public abstract class DB extends RoomDatabase {
                         db.execSQL("DROP VIEW `folder_view`");
                         db.execSQL("CREATE VIEW IF NOT EXISTS `folder_view` AS " + TupleFolderView.query);
                     }
-
                 }).addMigrations(new Migration(241, 242) {
                     @Override
                     public void migrate(@NonNull SupportSQLiteDatabase db) {
                         logMigration(startVersion, endVersion);
                         db.execSQL("ALTER TABLE `account` ADD COLUMN `unicode` INTEGER NOT NULL DEFAULT 0");
+                    }
+                }).addMigrations(new Migration(242, 243) {
+                    @Override
+                    public void migrate(@NonNull SupportSQLiteDatabase db) {
+                        logMigration(startVersion, endVersion);
+                        db.execSQL("ALTER TABLE `account` ADD COLUMN `keep_alive_noop` INTEGER NOT NULL DEFAULT 0");
+                        db.execSQL("UPDATE account SET keep_alive_noop = 1" +
+                                " WHERE host = 'outlook.office365.com' AND pop = " + EntityAccount.TYPE_IMAP);
                     }
                 }).addMigrations(new Migration(998, 999) {
                     @Override

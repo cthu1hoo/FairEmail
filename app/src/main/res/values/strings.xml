@@ -12,6 +12,8 @@
     <string name="app_continue">Continue anyway</string>
     <string name="app_exit">Go \'back\' again to exit</string>
     <string name="app_cake">Insufficient storage space left</string>
+    <string name="app_cake_remaining">Remaining storage space on the device: %1$s</string>
+    <string name="app_cake_required">Minimum required storage space: %1$s</string>
     <string name="app_updated">Last update: %1$s</string>
     <string name="app_download">Downloaded from: %1$s</string>
 
@@ -466,6 +468,7 @@
     <string name="title_advanced_download_eml">Download raw message files</string>
     <string name="title_advanced_download_plain">Download plain text only parts by default (if available)</string>
     <string name="title_advanced_validated">Require a validated (checked) connection</string>
+    <string name="title_advanced_validated_captive">Require a validated captive portal connection</string>
     <string name="title_advanced_vpn_only">Connect only via a VPN</string>
     <string name="title_advanced_timeout">Connection timeout (seconds)</string>
     <string name="title_advanced_prefer_ip4">Prefer IPv4 over IPv6</string>
@@ -776,10 +779,12 @@
     <string name="title_advanced_work_manager" translatable="false">Initialize work manager</string>
     <string name="title_advanced_external_storage" translatable="false">Use external storage</string>
     <string name="title_advanced_room_query_threads" translatable="false">ROOM query threads: %1$s</string>
+    <string name="title_advanced_integrity" translatable="false">sqlite integrity check</string>
     <string name="title_advanced_wal" translatable="false">sqlite WAL</string>
     <string name="title_advanced_checkpoints" translatable="false">sqlite checkpoints</string>
     <string name="title_advanced_analyze" translatable="false">sqlite analyze</string>
     <string name="title_advanced_auto_vacuum" translatable="false">sqlite auto vacuum</string>
+    <string name="title_advanced_sync_extra" translatable="false">sqlite sync extra</string>
     <string name="title_advanced_sqlite_cache" translatable="false">sqlite cache: %1$s %% - %2$s</string>
     <string name="title_advanced_chunk_size" translatable="false">Chunk size: %1$d</string>
     <string name="title_advanced_thread_range" translatable="false">Thread range: %1$d days</string>
@@ -970,6 +975,7 @@
     <string name="title_account_category">Category</string>
     <string name="title_account_name_hint">Used to differentiate folders</string>
     <string name="title_account_interval_hint">Frequency of refreshing the connection for push messages or frequency of checking for new messages</string>
+    <string name="title_account_noop_hint">This will refresh the connection more actively, but also use more battery power</string>
     <string name="title_account_partial_fetch_hint">Disable this only in case of empty messages or corrupt attachments</string>
     <string name="title_color">Color</string>
     <string name="title_background">Background</string>
@@ -1015,6 +1021,7 @@
     <string name="title_max_messages">Maximum number of messages to download (blank for all)</string>
     <string name="title_keep_poll_interval">Poll interval (minutes)</string>
     <string name="title_keep_alive_interval">Keep-alive interval (minutes)</string>
+    <string name="title_keep_alive_noop">Restart IMAP IDLE periodically</string>
     <string name="title_partial_fetch" translatable="false">Partial fetch</string>
     <string name="title_ignore_size" translatable="false">Ignore bodystructure size</string>
     <string name="title_server_time">Use received time (server)</string>
@@ -1373,7 +1380,6 @@
     <string name="title_compose">Compose</string>
     <string name="title_submitter">Sent by:</string>
     <string name="title_delivered_to">Delivered to:</string>
-    <string name="title_return_path">Return path:</string>
     <string name="title_from">From:</string>
     <string name="title_to">To:</string>
     <string name="title_reply_to">Reply to:</string>
@@ -1892,7 +1898,7 @@
     <string name="title_hint_folder_actions">Long press a folder for options, like adding a folder to the navigation menu for quick access</string>
     <string name="title_hint_folder_sync">To limit battery and network usage not all folders and not all messages will be synchronized by default</string>
     <string name="title_hint_airplane">Airplane mode is on</string>
-    <string name="title_hint_notification">Notifications are disabled</string>
+    <string name="title_hint_notifications">No notification permissions</string>
     <string name="title_hint_support">If you have a question or a problem, please use the support menu to get help</string>
     <string name="title_hint_message_actions">Swipe left to trash; Swipe right to archive (if available); The swipe actions can be configured in the account settings</string>
     <string name="title_hint_message_selection">Long press a message to start selecting multiple messages; Hold and swipe up or down to select more messages</string>
