@@ -651,6 +651,41 @@ public class MessageClassifier {
 
         long elapsed = new Date().getTime() - start;
         Log.i("Classifier data loaded elapsed=" + elapsed);
+
+        for (long account : wordClassFrequency.keySet()) {
+            Map<String, Long> total = new HashMap<>();
+            Map<String, Integer> count = new HashMap<>();
+
+            for (String word : wordClassFrequency.get(account).keySet())
+                for (String clazz : wordClassFrequency.get(account).get(word).keySet()) {
+                    int f = wordClassFrequency.get(account).get(word).get(clazz).count;
+
+                    if (!total.containsKey(clazz))
+                        total.put(clazz, 0L);
+                    total.put(clazz, total.get(clazz) + f);
+
+                    if (!count.containsKey(clazz))
+                        count.put(clazz, 0);
+                    count.put(clazz, count.get(clazz) + 1);
+                }
+
+            for (String word : wordClassFrequency.get(account).keySet())
+                for (String clazz : new ArrayList<>(wordClassFrequency.get(account).get(word).keySet())) {
+                    int freq = wordClassFrequency.get(account).get(word).get(clazz).count;
+                    long avg = total.get(clazz) / count.get(clazz);
+                    if (freq < avg / 2) {
+                        Log.i("Classifier dropping account=" + account +
+                                " word=" + word + " class=" + clazz + " freq=" + freq + " avg=" + avg);
+                        wordClassFrequency.get(account).get(word).remove(clazz);
+                    }
+                }
+
+            // Source 47 MB
+            // avg/1 = 21.3
+            // avg/2 = 25.5
+            // avg/3 = 29.0
+            // avg/5 = 34.6
+        }
     }
 
     static synchronized void cleanup(@NonNull Context context) {

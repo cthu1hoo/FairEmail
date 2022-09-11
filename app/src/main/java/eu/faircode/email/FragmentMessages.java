@@ -520,7 +520,8 @@ public class FragmentMessages extends FragmentBase
             setTitle(server ? R.string.title_search_server : R.string.title_search_device);
         }
 
-        if (viewType != AdapterMessage.ViewType.THREAD && EntityFolder.ARCHIVE.equals(type))
+        if (viewType != AdapterMessage.ViewType.THREAD &&
+                (EntityFolder.ARCHIVE.equals(type) || viewType == AdapterMessage.ViewType.SEARCH))
             filter_archive = false;
 
         try {
@@ -1582,6 +1583,7 @@ public class FragmentMessages extends FragmentBase
 
                     private void searchAccount(long account) {
                         Bundle aargs = new Bundle();
+                        aargs.putInt("icon", R.drawable.twotone_search_24);
                         aargs.putString("title", getString(R.string.title_search_in));
                         aargs.putLong("account", account);
                         aargs.putLongArray("disabled", new long[]{});
@@ -1925,6 +1927,7 @@ public class FragmentMessages extends FragmentBase
                                 triggered = true;
 
                                 Bundle args = new Bundle();
+                                args.putInt("icon", R.drawable.twotone_drive_file_move_24);
                                 args.putString("title", getString(R.string.title_move_to_folder));
                                 args.putLong("account", account);
                                 args.putString("thread", thread);
@@ -2812,7 +2815,11 @@ public class FragmentMessages extends FragmentBase
                 actionType = null;
             }
 
-            Log.i("Swiped dir=" + direction + " message=" + message.id);
+            Log.i("Swiped dir=" + direction +
+                    " action=" + action +
+                    " type=" + actionType +
+                    " message=" + message.id +
+                    " folder=" + message.folderType);
 
             if (EntityMessage.SWIPE_ACTION_ASK.equals(action)) {
                 adapter.notifyItemChanged(pos);
@@ -2978,6 +2985,7 @@ public class FragmentMessages extends FragmentBase
 
         private void onSwipeMove(final @NonNull TupleMessageEx message) {
             Bundle args = new Bundle();
+            args.putInt("icon", R.drawable.twotone_drive_file_move_24);
             args.putString("title", getString(R.string.title_move_to_folder));
             args.putLong("account", message.account);
             args.putLongArray("disabled", new long[]{message.folder});
@@ -4136,6 +4144,7 @@ public class FragmentMessages extends FragmentBase
 
     private void onActionMoveSelectionAccount(long account, boolean copy, List<Long> disabled) {
         Bundle args = new Bundle();
+        args.putInt("icon", copy ? R.drawable.twotone_file_copy_24 : R.drawable.twotone_drive_file_move_24);
         args.putString("title", getString(copy ? R.string.title_copy_to : R.string.title_move_to_folder));
         args.putLong("account", account);
         args.putBoolean("copy", copy);

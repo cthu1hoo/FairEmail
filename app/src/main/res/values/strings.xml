@@ -766,6 +766,7 @@
     <string name="title_advanced_app">App settings</string>
     <string name="title_advanced_more">More options</string>
     <string name="title_advanced_main_log">Main logging</string>
+    <string name="title_advanced_main_log_mem">Log memory usage</string>
     <string name="title_advanced_protocol">Protocol logging</string>
     <string name="title_advanced_log_info">Debug logging</string>
     <string name="title_advanced_debug">Debug mode</string>
@@ -815,6 +816,7 @@
     <string name="title_advanced_global_keywords" translatable="false">Global keywords</string>
     <string name="title_advanced_test_iab" translatable="false">Test IAB</string>
     <string name="title_advanced_import_providers" translatable="false">Import providers</string>
+    <string name="title_advanced_export_classifier" translatable="false">Export classifier</string>
     <string name="title_advanced_processors" translatable="false">Processors: %1$d</string>
     <string name="title_advanced_memory_class" translatable="false">Memory class: %1$s/%2$s Total: %3$s</string>
     <string name="title_advanced_memory_usage" translatable="false">Memory usage: %1$s/%2$s Native: %3$s</string>
@@ -1926,6 +1928,7 @@
     <string name="title_check_owner">Check owner</string>
     <string name="title_remark_owner">Information will be retrieved from <a href="https://ipinfo.io/">ipinfo.io</a></string>
     <string name="title_ip_owner">Owner IP address</string>
+    <string name="title_whois" translatable="false">Whois</string>
     <string name="title_default_apps">Default apps</string>
     <string name="title_reset_open">Set or clear default apps</string>
     <string name="title_select_app">Select app</string>
